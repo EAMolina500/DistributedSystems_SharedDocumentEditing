@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+service DocumentService {
+  rpc CreateCommand(Create) returns (Response) {}
+  rpc InsertCommand(Insert) returns (Response) {}
+  rpc DeleteCommand(Delete) returns (Response) {}
+  rpc DisplayCommand(Display) returns (Response) {}
+}
+
+service ServerCommunicationService {
+  rpc SendMessageToServers(Operation) returns (Response) {}
+}
+
+message Create {
+  string file_name = 1;
+}
+
+message Insert {
+  string file_name = 1;
+  int32 position = 2;
+  string character = 3;
+}
+
+message Delete {
+  string file_name = 1;
+  int32 position = 2;
+}
+
+message Display {
+  string file_name = 1;
+}
+
+message Response {
+  string message = 1;
+}
+
+message Request {
+  string message = 1;
+  repeated int32 vector_clock = 2;
+}
+
+message Operation {
+  int32 server_id = 1;
+  string file_name = 2;
+  string command = 3;
+  int32 position = 4;
+  string character = 5;
+  bool tumbstamp = 6;
+  repeated int32 timestamp = 7;
+  string replica_id = 8;
+}
+
+message Operations {
+  repeated Operation operations = 1;
+}
