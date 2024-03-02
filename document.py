@@ -5,7 +5,8 @@ class Document:
 
   def create(self):
     try:
-      with open(self._name + '.txt', "x") as f:
+      #with open(self._name + '.txt', "x") as f:
+      with open(self.format_name() + '.txt', "x") as f:
         f.close()
     except FileNotFoundError:
       print("File not found.")
@@ -23,11 +24,5 @@ class Document:
   def set_name(self, name):
     self._name = name
 
-  def write_strings(self, strings):
-    """Writes a list of strings to the document file."""
-    try:
-      with open(self._name + '.txt', 'a') as file:  # Open in append mode
-        for string in strings:
-          file.write(string + '\n')  # Write each string with a newline
-    except Exception as e:
-      print(f"An error occurred while writing to file: {e}")
+  def format_name(self):
+    return 'server_' + str(self._server_id) + '_' + self._name

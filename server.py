@@ -123,19 +123,16 @@ class Server:
         print(request_2)
 
       if reqs_number == 1:
-        if request.command == 'create':
-          self._crdt_array.set_document(request.file_name)
-        else:
-          # Caso: llega una request
-          # Actualizo vector clock local
-          local_vector_clock = self._crdt_array._vector_clock
-          print('local clock: ' + str(local_vector_clock.get_value()))
-          local_vector_clock.increment(self._server_id)
-          print('updated local clock: ' + str(local_vector_clock.get_value()))
+        # Caso: llega una request
+        # Actualizo vector clock local
+        local_vector_clock = self._crdt_array._vector_clock
+        print('local clock: ' + str(local_vector_clock.get_value()))
+        local_vector_clock.increment(self._server_id)
+        print('updated local clock: ' + str(local_vector_clock.get_value()))
 
-          # Aplico operacion recibida
-          self.add_operation_from_request(request)
-          self._crdt_array.apply_operations()
+        # Aplico operacion recibida
+        self.add_operation_from_request(request)
+        self._crdt_array.apply_operations()
 
       elif reqs_number == 2:
         vector_clock_1 = vector_clock.VectorClock(request_1.timestamp)

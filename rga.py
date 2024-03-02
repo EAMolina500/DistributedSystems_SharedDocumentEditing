@@ -80,6 +80,10 @@ class RGA:
         self._main_array.insert(operation["position"], operation["character"])
       elif operation["command"] == "delete":
         del self._main_array[operation["position"]]
+      elif operation["command"] == "create":
+        #self.set_document(operation["file_name"])
+        self._document = document.Document(operation["file_name"], self._server_id)
+        self._document.create()
 
     self._operations_array = []
 
@@ -94,7 +98,6 @@ class RGA:
     self._server_id = server_id
 
   def get_operations_array(self):
-    self.empty_operations_array()
     return self._operations_array
 
   def set_document(self, name):
