@@ -77,97 +77,85 @@ class Server:
     return response
 
   def merge(self):
-    request_1 = None
-    request_2 = None
+    requests = self.get_requests()
+    request_1 = requests[0]
+    request_2 = requests[1]
 
+    requests_number = 0
+    if request_1 and request_2:
+      requests_number = 2
+    elif request_1:
+      requests_number = 1
+      request = request_1
+    elif request_2:
+      requests_number = 1
+      request = request_1
+
+    if requests_number == 1:
+      # Caso: llega una request
+      # Actualizo vector clock local
+      other_clock = vector_clock.VectorClock(request.timestamp)
+      print('sending clock: ' + str(other_clock.get_value()))
+      local_vector_clock = self._crdt_array._vector_clock
+      print('local clock: ' + str(local_vector_clock.get_value()))
+      local_vector_clock.increment(self._server_id)
+      print('updated local clock: ' + str(local_vector_clock.get_value()))
+      new_clock = local_vector_clock.compute_new(other_clock)
+      print('updated local clock: ' + str(new_clock.get_value()))
+
+      # Aplico operacion recibida
+      self.add_operation_from_request(request)
+      self._crdt_array.apply_operations()
+
+      request_1 = None
+      request_2 = None
+    elif requests_number == 2:
+      #
+      vector_clock_1 = vector_clock.VectorClock(request_1.timestamp)
+      vector_clock_2 = vector_clock.VectorClock(request_2.timestamp)
+      result = vector_clock_1.compare(vector_clock_2)
+
+      if not self.insert_conflict(request_1, request_2):
+        if (result == 'smaller'):
+          self.add_operation_from_request(request_1)
+          self.add_operation_from_request(request_2)
+        elif (result == 'larger'):
+          self.add_operation_from_request(request_2)
+          self.add_operation_from_request(request_1)
+        else:
+          print('Vector clocks iguales o nulos')
+          print('Resultado: ' + result)
+      else: # hay conflicto
+        if (request_1.replica_id < request_2.replica_id):
+          request_2.position += 1
+          self.add_operation_from_request(request_1)
+          self.add_operation_from_request(request_2)
+        else:
+          request_1.position += 1
+          self.add_operation_from_request(request_2)
+          self.add_operation_from_request(request_1)
+
+      self._crdt_array.apply_operations()
+
+      request_1 = None
+      request_2 = None
+
+  def get_requests(self):
+    requests = [None, None]
     if (self._server_id == 1):
-      request_1 = self._server_communication_service.get_request_from_server2()
-      request_2 = self._server_communication_service.get_request_from_server3()
-      self._server_communication_service.empty_requests()
+      requests[0] = self._server_communication_service.get_request_from_server2()
+      requests[1] = self._server_communication_service.get_request_from_server3()
     elif (self._server_id == 2):
-      request_1 = self._server_communication_service.get_request_from_server1()
-      request_2 = self._server_communication_service.get_request_from_server3()
-      self._server_communication_service.empty_requests()
+      requests[0] = self._server_communication_service.get_request_from_server1()
+      requests[1] = self._server_communication_service.get_request_from_server3()
     elif (self._server_id == 3):
-      request_1 = self._server_communication_service.get_request_from_server1()
-      request_2 = self._server_communication_service.get_request_from_server2()
-      self._server_communication_service.empty_requests()
+      requests[0] = self._server_communication_service.get_request_from_server1()
+      requests[1] = self._server_communication_service.get_request_from_server2()
     else:
       print('Invalid server id')
 
-    reqs_number = 0
-
-    if (request_1 and request_2):
-      reqs_number = 2
-    elif (request_1):
-      request = request_1
-      reqs_number = 1
-    elif (request_2):
-      request = request_2
-      reqs_number = 1
-    else:
-      aux = True # eliminar
-      #print('Request are None')
-
-    if reqs_number > 0 and self._server_communication_service.apply_command():
-      """
-      if request_1:
-        print('request from server 1 o 2:')
-        print(request_1)
-      if request_2:
-        print('request from server 2 o 3:')
-        print(request_2)
-      """
-
-      if reqs_number == 1:
-        # Caso: llega una request
-        # Actualizo vector clock local
-        other_clock = vector_clock.VectorClock(request.timestamp)
-        print('sending clock: ' + str(other_clock.get_value()))
-        local_vector_clock = self._crdt_array._vector_clock
-        print('local clock: ' + str(local_vector_clock.get_value()))
-        local_vector_clock.increment(self._server_id)
-        print('updated local clock: ' + str(local_vector_clock.get_value()))
-        new_clock = local_vector_clock.compute_new(other_clock)
-        print('updated local clock: ' + str(new_clock.get_value()))
-
-        # Aplico operacion recibida
-        self.add_operation_from_request(request)
-        self._crdt_array.apply_operations()
-      elif reqs_number == 2:
-        #
-        vector_clock_1 = vector_clock.VectorClock(request_1.timestamp)
-        vector_clock_2 = vector_clock.VectorClock(request_2.timestamp)
-        result = vector_clock_1.compare(vector_clock_2)
-
-        if not self.insert_conflict(request_1, request_2):
-          if (result == 'smaller'):
-            self.add_operation_from_request(request_1)
-            self.add_operation_from_request(request_2)
-          elif (result == 'larger'):
-            self.add_operation_from_request(request_2)
-            self.add_operation_from_request(request_1)
-          else:
-            print('Vector clocks iguales o nulos')
-            print('Resultado: ' + result)
-        else: # hay conflicto
-          if (request_1.replica_id < request_2.replica_id):
-            request_2.position += 1
-            self.add_operation_from_request(request_1)
-            self.add_operation_from_request(request_2)
-          else:
-            request_1.position += 1
-            self.add_operation_from_request(request_2)
-            self.add_operation_from_request(request_1)
-
-        self._crdt_array.apply_operations()
-
-      else:
-        print('REQS_NUMBER NO ES NI 1 NI 2 / WTF ???')
-
-      self._server_communication_service.reset_apply_command()
-      request_1 = None
-      request_2 = None
+    self._server_communication_service.empty_requests()
+    return requests
 
   def insert_conflict(self, request_1, request_2):
     return request_1.command == 'insert' and request_2.command == 'insert' and request_1.position == request_2.position
