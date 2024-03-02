@@ -17,9 +17,14 @@ class Client:
     print("Respuesta del servidor:", response.message)
 
   def get_params(self):
-    file_name = input('Enter a file name: ')
+    print('Puede escribir los comandos:')
+    print('1. create')
+    print('2. insert')
+    print('3. delete')
+    print('4. display')
     command = input('Enter an action: ')
     if (command == 'create'):
+      file_name = input('Enter a file name: ')
       params = {
         'command': command,
         'file_name': file_name
@@ -29,7 +34,6 @@ class Client:
       character = input('Enter a character: ')
       params = {
         'command': command,
-        'file_name': file_name,
         'position': position,
         'character': character
       }
@@ -37,13 +41,11 @@ class Client:
       position = int(input('Enter a position: '))
       params = {
         'command': command,
-        'file_name': file_name,
         'position': position
       }
     elif (command == 'display'):
       params = {
-        'command': command,
-        'file_name': file_name
+        'command': command
       }
 
     return params
@@ -52,11 +54,11 @@ class Client:
     if (params['command'] == 'create'):
       response = stub.CreateCommand(document_pb2.Create(file_name=params['file_name']))
     elif (params['command'] == 'insert'):
-      response = stub.InsertCommand(document_pb2.Insert(file_name=params['file_name'], position=params['position'], character=params['character']))
+      response = stub.InsertCommand(document_pb2.Insert(position=params['position'], character=params['character']))
     elif (params['command'] == 'delete'):
-      response = stub.DeleteCommand(document_pb2.Delete(file_name=params['file_name'], position=params['position']))
+      response = stub.DeleteCommand(document_pb2.Delete(position=params['position']))
     elif (params['command'] == 'display'):
-      response = stub.DisplayCommand(document_pb2.Display(file_name=params['file_name']))
+      response = stub.DisplayCommand(document_pb2.Display()) # Revisar
 
     return response
 

@@ -13,8 +13,8 @@ class Document:
     except Exception as e:
       print(f"An error occurred: {e}")
 
-  def from_array_to_file(self, array, name):
-    with open(self._name + '.txt', 'w') as file:
+  def from_array_to_file(self, array):
+    with open(self.format_name() + '.txt', 'w') as file:
       string = str(array)
       file.write(string)
 

@@ -13,7 +13,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0e\x64ocument.proto\"\x1b\n\x06\x43reate\x12\x11\n\tfile_name\x18\x01 \x01(\t\"@\n\x06Insert\x12\x11\n\tfile_name\x18\x01 \x01(\t\x12\x10\n\x08position\x18\x02 \x01(\x05\x12\x11\n\tcharacter\x18\x03 \x01(\t\"-\n\x06\x44\x65lete\x12\x11\n\tfile_name\x18\x01 \x01(\t\x12\x10\n\x08position\x18\x02 \x01(\x05\"\x1c\n\x07\x44isplay\x12\x11\n\tfile_name\x18\x01 \x01(\t\"\x1b\n\x08Response\x12\x0f\n\x07message\x18\x01 \x01(\t\"0\n\x07Request\x12\x0f\n\x07message\x18\x01 \x01(\t\x12\x14\n\x0cvector_clock\x18\x02 \x03(\x05\"\xa1\x01\n\tOperation\x12\x11\n\tserver_id\x18\x01 \x01(\x05\x12\x11\n\tfile_name\x18\x02 \x01(\t\x12\x0f\n\x07\x63ommand\x18\x03 \x01(\t\x12\x10\n\x08position\x18\x04 \x01(\x05\x12\x11\n\tcharacter\x18\x05 \x01(\t\x12\x11\n\ttumbstamp\x18\x06 \x01(\x08\x12\x11\n\ttimestamp\x18\x07 \x03(\x05\x12\x12\n\nreplica_id\x18\x08 \x01(\t\",\n\nOperations\x12\x1e\n\noperations\x18\x01 \x03(\x0b\x32\n.Operation2\xaf\x01\n\x0f\x44ocumentService\x12%\n\rCreateCommand\x12\x07.Create\x1a\t.Response\"\x00\x12%\n\rInsertCommand\x12\x07.Insert\x1a\t.Response\"\x00\x12%\n\rDeleteCommand\x12\x07.Delete\x1a\t.Response\"\x00\x12\'\n\x0e\x44isplayCommand\x12\x08.Display\x1a\t.Response\"\x00\x32M\n\x1aServerCommunicationService\x12/\n\x14SendMessageToServers\x12\n.Operation\x1a\t.Response\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0e\x64ocument.proto\"\x1b\n\x06\x43reate\x12\x11\n\tfile_name\x18\x01 \x01(\t\"-\n\x06Insert\x12\x10\n\x08position\x18\x01 \x01(\x05\x12\x11\n\tcharacter\x18\x02 \x01(\t\"\x1a\n\x06\x44\x65lete\x12\x10\n\x08position\x18\x01 \x01(\x05\"\t\n\x07\x44isplay\"\x1b\n\x08Response\x12\x0f\n\x07message\x18\x01 \x01(\t\"0\n\x07Request\x12\x0f\n\x07message\x18\x01 \x01(\t\x12\x14\n\x0cvector_clock\x18\x02 \x03(\x05\"\xa1\x01\n\tOperation\x12\x11\n\tserver_id\x18\x01 \x01(\x05\x12\x11\n\tfile_name\x18\x02 \x01(\t\x12\x0f\n\x07\x63ommand\x18\x03 \x01(\t\x12\x10\n\x08position\x18\x04 \x01(\x05\x12\x11\n\tcharacter\x18\x05 \x01(\t\x12\x11\n\ttumbstamp\x18\x06 \x01(\x08\x12\x11\n\ttimestamp\x18\x07 \x03(\x05\x12\x12\n\nreplica_id\x18\x08 \x01(\t\",\n\nOperations\x12\x1e\n\noperations\x18\x01 \x03(\x0b\x32\n.Operation2\xaf\x01\n\x0f\x44ocumentService\x12%\n\rCreateCommand\x12\x07.Create\x1a\t.Response\"\x00\x12%\n\rInsertCommand\x12\x07.Insert\x1a\t.Response\"\x00\x12%\n\rDeleteCommand\x12\x07.Delete\x1a\t.Response\"\x00\x12\'\n\x0e\x44isplayCommand\x12\x08.Display\x1a\t.Response\"\x00\x32M\n\x1aServerCommunicationService\x12/\n\x14SendMessageToServers\x12\n.Operation\x1a\t.Response\"\x00\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -23,21 +23,21 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _globals['_CREATE']._serialized_start=18
   _globals['_CREATE']._serialized_end=45
   _globals['_INSERT']._serialized_start=47
-  _globals['_INSERT']._serialized_end=111
-  _globals['_DELETE']._serialized_start=113
-  _globals['_DELETE']._serialized_end=158
-  _globals['_DISPLAY']._serialized_start=160
-  _globals['_DISPLAY']._serialized_end=188
-  _globals['_RESPONSE']._serialized_start=190
-  _globals['_RESPONSE']._serialized_end=217
-  _globals['_REQUEST']._serialized_start=219
-  _globals['_REQUEST']._serialized_end=267
-  _globals['_OPERATION']._serialized_start=270
-  _globals['_OPERATION']._serialized_end=431
-  _globals['_OPERATIONS']._serialized_start=433
-  _globals['_OPERATIONS']._serialized_end=477
-  _globals['_DOCUMENTSERVICE']._serialized_start=480
-  _globals['_DOCUMENTSERVICE']._serialized_end=655
-  _globals['_SERVERCOMMUNICATIONSERVICE']._serialized_start=657
-  _globals['_SERVERCOMMUNICATIONSERVICE']._serialized_end=734
+  _globals['_INSERT']._serialized_end=92
+  _globals['_DELETE']._serialized_start=94
+  _globals['_DELETE']._serialized_end=120
+  _globals['_DISPLAY']._serialized_start=122
+  _globals['_DISPLAY']._serialized_end=131
+  _globals['_RESPONSE']._serialized_start=133
+  _globals['_RESPONSE']._serialized_end=160
+  _globals['_REQUEST']._serialized_start=162
+  _globals['_REQUEST']._serialized_end=210
+  _globals['_OPERATION']._serialized_start=213
+  _globals['_OPERATION']._serialized_end=374
+  _globals['_OPERATIONS']._serialized_start=376
+  _globals['_OPERATIONS']._serialized_end=420
+  _globals['_DOCUMENTSERVICE']._serialized_start=423
+  _globals['_DOCUMENTSERVICE']._serialized_end=598
+  _globals['_SERVERCOMMUNICATIONSERVICE']._serialized_start=600
+  _globals['_SERVERCOMMUNICATIONSERVICE']._serialized_end=677
 # @@protoc_insertion_point(module_scope)

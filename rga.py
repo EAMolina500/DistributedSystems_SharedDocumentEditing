@@ -10,8 +10,7 @@ class RGA:
     self._vector_clock = vector_clock.VectorClock()
 
   def create(self, name):
-    self._document = document.Document(name, self._server_id)
-    self._document.create()
+    self.create_file(name)
     self.add_operation(
       server_id=self._server_id,
       file_name=self._document.get_name(),
@@ -19,30 +18,36 @@ class RGA:
     )
 
   def insert(self, index, value):
-    self._vector_clock.increment(self._server_id)
-    self.add_operation(
-      server_id=self._server_id,
-      file_name=self._document.get_name(),
-      command='insert',
-      position=index,
-      character=value,
-      timestamp=self._vector_clock.get_value(),
-      replica_id=self._get_next_replica_id()
-    )
-    print(self._operations_array)
+    if self._document:
+      self._vector_clock.increment(self._server_id)
+      self.add_operation(
+        server_id=self._server_id,
+        file_name=self._document.get_name(),
+        command='insert',
+        position=index,
+        character=value,
+        timestamp=self._vector_clock.get_value(),
+        replica_id=self._get_next_replica_id()
+      )
+      print(self._operations_array)
+    else:
+      print('Accion insertar / Documento inexistente')
 
   def delete(self, index):
-    self._vector_clock.increment(self._server_id)
-    self.add_operation(
-      server_id=self._server_id,
-      file_name=self._document.get_name(),
-      command='delete',
-      position=index,
-      tumbstamp=True,
-      timestamp=self._vector_clock.get_value(),
-      replica_id=self._get_next_replica_id()
-    )
-    print(self._operations_array)
+    if self._document:
+      self._vector_clock.increment(self._server_id)
+      self.add_operation(
+        server_id=self._server_id,
+        file_name=self._document.get_name(),
+        command='delete',
+        position=index,
+        tumbstamp=True,
+        timestamp=self._vector_clock.get_value(),
+        replica_id=self._get_next_replica_id()
+      )
+      print(self._operations_array)
+    else:
+      print('Accion borrar / Documento inexistente')
 
   def add_operation(self, server_id=0, file_name="", command="", position=-1, character="", tumbstamp=False, timestamp=[0,0,0], replica_id=""):
     self._operations_array.append({
@@ -59,7 +64,7 @@ class RGA:
   def display(self):
     self.apply_operations()
     print(self._main_array)
-    #self._document.from_array_to_file(self._main_array, self._document.get_name())
+    self._document.from_array_to_file(self._main_array)
 
   def _get_next_replica_id(self):
     replica_id = str(len(self._operations_array)+1)
@@ -81,11 +86,19 @@ class RGA:
       elif operation["command"] == "delete":
         del self._main_array[operation["position"]]
       elif operation["command"] == "create":
-        #self.set_document(operation["file_name"])
-        self._document = document.Document(operation["file_name"], self._server_id)
-        self._document.create()
+        self.create_file(operation["file_name"])
 
     self._operations_array = []
+
+  def create_file(self, name):
+    try:
+      if self._document is None:
+        self._document = document.Document(name, self._server_id)
+        self._document.create()
+      else:
+        print('Se permite crear un unico documento y el mismo ya fue creado')
+    except:
+      print('Error al crear el archivo')
 
   def get_value(self):
     self.apply_operations()

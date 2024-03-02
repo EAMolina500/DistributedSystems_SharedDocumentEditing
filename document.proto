@@ -16,18 +16,16 @@ message Create {
 }
 
 message Insert {
-  string file_name = 1;
-  int32 position = 2;
-  string character = 3;
+  int32 position = 1;
+  string character = 2;
 }
 
 message Delete {
-  string file_name = 1;
-  int32 position = 2;
+  int32 position = 1;
 }
 
 message Display {
-  string file_name = 1;
+
 }
 
 message Response {
