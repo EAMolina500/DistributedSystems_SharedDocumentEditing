@@ -12,11 +12,11 @@ class Client:
   def send_command(self):
     channel = grpc.insecure_channel("localhost:" + self._server_port)
     stub = document_pb2_grpc.DocumentServiceStub(channel)
-    params = self.get_params()
+    params = self.get_params_from_console()
     response = self.get_response(params, stub)
     print("Respuesta del servidor:", response.message)
 
-  def get_params(self):
+  def get_params_from_console(self):
     print('Puede escribir los comandos:')
     print('1. create')
     print('2. insert')
@@ -49,6 +49,27 @@ class Client:
       }
 
     return params
+
+  ###
+
+  def send_command_with_params(self, command="", file_name="", position=-1, character=''):
+    channel = grpc.insecure_channel("localhost:" + self._server_port)
+    stub = document_pb2_grpc.DocumentServiceStub(channel)
+    params = self.get_params(command, file_name, position, character)
+    response = self.get_response(params, stub)
+    print("Respuesta del servidor:", response.message)
+
+  def get_params(self, command="", file_name="", position=-1, character=''):
+    params = {
+      'command': command,
+      'file_name': file_name,
+      'position': position,
+      'character': character
+    }
+
+    return params
+
+  ###
 
   def get_response(self, params, stub):
     if (params['command'] == 'create'):

@@ -53,23 +53,15 @@ class Server:
   def send_message_to_server(self, port, operations_array):
     try:
       channel = grpc.insecure_channel(f'localhost:{port}')
-      print('1')
       stub = document_pb2_grpc.ServerCommunicationServiceStub(channel)
-      print('2')
       response = self.get_response(stub, operations_array)
-      print('3')
       print(f"Respuesta del servidor: {response}")
-      print('4')
     except:
       print('Servers down')
 
   def get_response(self, stub, operations_array):
     index = len(operations_array)-1
-
-    print('INDEX: ' + str(index))
     op = operations_array[index]
-
-    print('OPERACION: ' + str(op))
 
     response = stub.SendMessageToServers(document_pb2.Operation(
       server_id=op['server_id'],

@@ -4,6 +4,7 @@ import vector_clock
 class RGA:
   def __init__(self, initial_value=[], server_id=0):
     self._main_array = initial_value
+    self._historical_operations_array = []
     self._operations_array = []
     self._server_id = server_id
     self._document = None
@@ -29,7 +30,9 @@ class RGA:
         timestamp=self._vector_clock.get_value(),
         replica_id=self._get_next_replica_id()
       )
-      print(self._operations_array)
+      print('inserting')
+      index = len(self._historical_operations_array)-1
+      print(self._historical_operations_array[index])
     else:
       print('Accion insertar / Documento inexistente')
 
@@ -45,12 +48,14 @@ class RGA:
         timestamp=self._vector_clock.get_value(),
         replica_id=self._get_next_replica_id()
       )
-      print(self._operations_array)
+      print('deleting')
+      index = len(self._historical_operations_array)-1
+      print(self._historical_operations_array[index])
     else:
       print('Accion borrar / Documento inexistente')
 
   def add_operation(self, server_id=0, file_name="", command="", position=-1, character="", tumbstamp=False, timestamp=[0,0,0], replica_id=""):
-    self._operations_array.append({
+    params = {
       "server_id": server_id,
       "file_name": file_name,
       "command": command,
@@ -59,15 +64,18 @@ class RGA:
       "tumbstamp": tumbstamp,
       "timestamp": timestamp,
       "replica_id": replica_id
-    })
+    }
+    self._historical_operations_array.append(params)
+    self._operations_array.append(params)
 
   def display(self):
     self.apply_operations()
-    print(self._main_array)
     self._document.from_array_to_file(self._main_array)
+    for op in self._historical_operations_array:
+      print(op)
 
   def _get_next_replica_id(self):
-    replica_id = str(len(self._operations_array)+1)
+    replica_id = str(len(self._historical_operations_array)+1)
     if (self._server_id == 1):
       replica_id += 'A'
     elif (self._server_id == 2):
