@@ -14,54 +14,54 @@ class Server:
   def __init__(self, server_id, port):
     self._server_id = server_id
     self._port = port
-    self._crdt_array = None
+    self._document_service = document_service.DocumentService(server_id)
+    self._server_communication_service = server_communication_service.ServerCommunicationService()
+    self._crdt_array = self._document_service.get_crdt_array()
 
-  def run_server(self, document_service, server_communication_service):
-    #document_service.set_server_id(self._server_id)
-    self.set_crdt_array(document_service.get_crdt_array())
-
+  def run_server(self):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    document_pb2_grpc.add_DocumentServiceServicer_to_server(document_service, server)
-    document_pb2_grpc.add_ServerCommunicationServiceServicer_to_server(server_communication_service, server)
+    document_pb2_grpc.add_DocumentServiceServicer_to_server(self._document_service, server)
+    document_pb2_grpc.add_ServerCommunicationServiceServicer_to_server(self._server_communication_service, server)
     server.add_insecure_port(f"[::]:{self._port}")
     server.start()
     print("Servidor gRPC iniciado en el puerto / Escuchando en el puerto " + self._port + "...")
     # Posiblemente hacer un ciclo infinito que escuche los mensajes de los clientes para actuar en consecuencia
     while True:
-      self.send_message_to_servers(self._server_id, document_service, self._crdt_array.get_operations_array())
-      self.merge(server_communication_service)
+      self.send_message_to_servers()
+      self.merge()
     server.wait_for_termination()
 
-  def send_message_to_servers(self, server_id, document_service, operations_array):
-    if document_service.send_command():
-      if (server_id == 1):
+  def send_message_to_servers(self):
+    if self._document_service.send_command():
+      if (self._server_id == 1):
         port_1 = '50052'
         port_2 = '50053'
-      elif (server_id == 2):
+      elif (self._server_id == 2):
         port_1 = '50051'
         port_2 = '50053'
-      elif (server_id == 3):
+      elif (self._server_id == 3):
         port_1 = '50051'
         port_2 = '50052'
       else:
         print('Invalid server id')
 
-      self.send_message_to_server(port_1, operations_array)
-      self.send_message_to_server(port_2, operations_array)
-      document_service.reset_send_command()
+      self.send_message_to_server(port_1)
+      self.send_message_to_server(port_2)
+      self._document_service.reset_send_command()
 
-  def send_message_to_server(self, port, operations_array):
+  def send_message_to_server(self, port):
     try:
       channel = grpc.insecure_channel(f'localhost:{port}')
       stub = document_pb2_grpc.ServerCommunicationServiceStub(channel)
-      response = self.get_response(stub, operations_array)
+      response = self.get_response(stub)
       print(f"Respuesta del servidor: {response}")
     except:
       print('Servers down')
 
-  def get_response(self, stub, operations_array):
-    index = len(operations_array)-1
-    op = operations_array[index]
+  def get_response(self, stub):
+    ops_array = self._crdt_array.get_operations_array()
+    index = len(ops_array)-1
+    op = ops_array[index]
 
     response = stub.SendMessageToServers(document_pb2.Operation(
       server_id=op['server_id'],
@@ -76,22 +76,22 @@ class Server:
 
     return response
 
-  def merge(self, server_communication_service):
+  def merge(self):
     request_1 = None
     request_2 = None
 
     if (self._server_id == 1):
-      request_1 = server_communication_service.get_request_from_server2()
-      request_2 = server_communication_service.get_request_from_server3()
-      server_communication_service.empty_requests()
+      request_1 = self._server_communication_service.get_request_from_server2()
+      request_2 = self._server_communication_service.get_request_from_server3()
+      self._server_communication_service.empty_requests()
     elif (self._server_id == 2):
-      request_1 = server_communication_service.get_request_from_server1()
-      request_2 = server_communication_service.get_request_from_server3()
-      server_communication_service.empty_requests()
+      request_1 = self._server_communication_service.get_request_from_server1()
+      request_2 = self._server_communication_service.get_request_from_server3()
+      self._server_communication_service.empty_requests()
     elif (self._server_id == 3):
-      request_1 = server_communication_service.get_request_from_server1()
-      request_2 = server_communication_service.get_request_from_server2()
-      server_communication_service.empty_requests()
+      request_1 = self._server_communication_service.get_request_from_server1()
+      request_2 = self._server_communication_service.get_request_from_server2()
+      self._server_communication_service.empty_requests()
     else:
       print('Invalid server id')
 
@@ -109,7 +109,7 @@ class Server:
       aux = True # eliminar
       #print('Request are None')
 
-    if reqs_number > 0 and server_communication_service.apply_command():
+    if reqs_number > 0 and self._server_communication_service.apply_command():
       """
       if request_1:
         print('request from server 1 o 2:')
@@ -165,7 +165,7 @@ class Server:
       else:
         print('REQS_NUMBER NO ES NI 1 NI 2 / WTF ???')
 
-      server_communication_service.reset_apply_command()
+      self._server_communication_service.reset_apply_command()
       request_1 = None
       request_2 = None
 
@@ -183,9 +183,6 @@ class Server:
       timestamp=request.timestamp,
       replica_id=request.replica_id
     )
-
-  def set_crdt_array(self, crdt_array):
-    self._crdt_array = crdt_array
 
     """
     comp = self._crdt_array.timestamp.compare(request.timestamp) # Esto no funciona, debo comparar relojes no arreglos
@@ -212,21 +209,15 @@ if __name__ == "__main__":
   if (server_id == 1):
     port = '50051'
     server_1 = Server(server_id, port)
-    scs_1 = server_communication_service.ServerCommunicationService()
-    ds_1 = document_service.DocumentService(server_id)
-    server_1.run_server(ds_1, scs_1)
+    server_1.run_server()
   elif (server_id == 2):
     port = '50052'
-    server_2 = Server(server_id, port)
-    scs_2 = server_communication_service.ServerCommunicationService()
-    ds_2 = document_service.DocumentService(server_id)
-    server_2.run_server(ds_2, scs_2)
+    server_1 = Server(server_id, port)
+    server_1.run_server()
   elif (server_id == 3):
     port = '50053'
-    server_3 = Server(server_id, port)
-    scs_3 = server_communication_service.ServerCommunicationService()
-    ds_3 = document_service.DocumentService(server_id)
-    server_3.run_server(ds_3, scs_3)
+    server_1 = Server(server_id, port)
+    server_1.run_server()
   else:
     print('Invalid param')
 
