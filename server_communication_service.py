@@ -47,3 +47,8 @@ class ServerCommunicationService(document_pb2_grpc.ServerCommunicationServiceSer
 
   def set_request_from_server3(self, request):
     self._request_from_server3 = request
+
+  def empty_requests(self):
+    self._request_from_server1 = None
+    self._request_from_server2 = None
+    self._request_from_server3 = None

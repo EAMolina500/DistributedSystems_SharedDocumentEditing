@@ -91,12 +91,15 @@ class Server:
     if (self._server_id == 1):
       request_1 = server_communication_service.get_request_from_server2()
       request_2 = server_communication_service.get_request_from_server3()
+      server_communication_service.empty_requests()
     elif (self._server_id == 2):
       request_1 = server_communication_service.get_request_from_server1()
       request_2 = server_communication_service.get_request_from_server3()
+      server_communication_service.empty_requests()
     elif (self._server_id == 3):
       request_1 = server_communication_service.get_request_from_server1()
       request_2 = server_communication_service.get_request_from_server2()
+      server_communication_service.empty_requests()
     else:
       print('Invalid server id')
 
@@ -115,55 +118,55 @@ class Server:
       #print('Request are None')
 
     if reqs_number > 0 and server_communication_service.apply_command():
+      """
       if request_1:
         print('request from server 1 o 2:')
         print(request_1)
       if request_2:
         print('request from server 2 o 3:')
         print(request_2)
+      """
 
       if reqs_number == 1:
         # Caso: llega una request
         # Actualizo vector clock local
+        other_clock = vector_clock.VectorClock(request.timestamp)
+        print('sending clock: ' + str(other_clock.get_value()))
         local_vector_clock = self._crdt_array._vector_clock
         print('local clock: ' + str(local_vector_clock.get_value()))
         local_vector_clock.increment(self._server_id)
         print('updated local clock: ' + str(local_vector_clock.get_value()))
+        new_clock = local_vector_clock.compute_new(other_clock)
+        print('updated local clock: ' + str(new_clock.get_value()))
 
         # Aplico operacion recibida
         self.add_operation_from_request(request)
         self._crdt_array.apply_operations()
-
       elif reqs_number == 2:
+        #
         vector_clock_1 = vector_clock.VectorClock(request_1.timestamp)
         vector_clock_2 = vector_clock.VectorClock(request_2.timestamp)
         result = vector_clock_1.compare(vector_clock_2)
 
-        if self.insert_conflict(request_1, request_2):
-          if (result == 1): # vector_clock_1 mas grande
-            self.add_operation_from_request(request_2)
-            self.add_operation_from_request(request_1)
-          elif (result == -1):
+        if not self.insert_conflict(request_1, request_2):
+          if (result == 'smaller'):
             self.add_operation_from_request(request_1)
             self.add_operation_from_request(request_2)
-          else:
-            if (request_1.replica_id < request_2.replica_id):
-              request_2.position += 1
-              self.add_operation_from_request(request_1)
-              self.add_operation_from_request(request_2)
-            else:
-              request_1.position += 1
-              self.add_operation_from_request(request_2)
-              self.add_operation_from_request(request_1)
-        else:
-          if (result == 1): # vector_clock_1 mas grande
+          elif (result == 'larger'):
             self.add_operation_from_request(request_2)
             self.add_operation_from_request(request_1)
-          elif (result == -1):
-            self.add_operation_from_request(request_1)
-            self.add_operation_from_request(request_2)
           else:
             print('Vector clocks iguales o nulos')
+            print('Resultado: ' + result)
+        else: # hay conflicto
+          if (request_1.replica_id < request_2.replica_id):
+            request_2.position += 1
+            self.add_operation_from_request(request_1)
+            self.add_operation_from_request(request_2)
+          else:
+            request_1.position += 1
+            self.add_operation_from_request(request_2)
+            self.add_operation_from_request(request_1)
 
         self._crdt_array.apply_operations()
 
@@ -171,6 +174,8 @@ class Server:
         print('REQS_NUMBER NO ES NI 1 NI 2 / WTF ???')
 
       server_communication_service.reset_apply_command()
+      request_1 = None
+      request_2 = None
 
   def insert_conflict(self, request_1, request_2):
     return request_1.command == 'insert' and request_2.command == 'insert' and request_1.position == request_2.position
@@ -214,14 +219,22 @@ if __name__ == "__main__":
 
   if (server_id == 1):
     port = '50051'
+    server_1 = Server(server_id, port)
+    scs_1 = server_communication_service.ServerCommunicationService()
+    ds_1 = document_service.DocumentService(server_id)
+    server_1.run_server(ds_1, scs_1)
   elif (server_id == 2):
     port = '50052'
+    server_2 = Server(server_id, port)
+    scs_2 = server_communication_service.ServerCommunicationService()
+    ds_2 = document_service.DocumentService(server_id)
+    server_2.run_server(ds_2, scs_2)
   elif (server_id == 3):
     port = '50053'
+    server_3 = Server(server_id, port)
+    scs_3 = server_communication_service.ServerCommunicationService()
+    ds_3 = document_service.DocumentService(server_id)
+    server_3.run_server(ds_3, scs_3)
   else:
     print('Invalid param')
 
-  server = Server(server_id, port)
-  sc_service = server_communication_service.ServerCommunicationService()
-  d_service = document_service.DocumentService(server_id)
-  server.run_server(d_service, sc_service)

@@ -67,12 +67,15 @@ if __name__ == "__main__":
 
   if (client_id == 1):
     port = '50051'
+    client = Client(client_id, port)
+    client.send_command()
   elif (client_id == 2):
     port = '50052'
+    client = Client(client_id, port)
+    client.send_command()
   elif (client_id == 3):
     port = '50053'
+    client = Client(client_id, port)
+    client.send_command()
   else:
     print('Invalid param')
-
-  client = Client(client_id, port)
-  client.send_command()

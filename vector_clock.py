@@ -31,6 +31,10 @@ class VectorClock:
     else:
       return None
 
+  def compute_new(self, other_clock):
+    new_clock = VectorClock([max(a, b) for a, b in zip(self._clock, other_clock._clock)])
+    return new_clock
+
 if __name__ == "__main__":
   vc = VectorClock() # [0,0,0]
 
@@ -41,6 +45,9 @@ if __name__ == "__main__":
   vc.increment(3)
   print(vc.get_value())
 
-  vc1 = VectorClock([0,1,0])
-  vc2 = VectorClock([0,-1,-1])
-  print(vc1.compare_2(vc2))
+  vc1 = VectorClock([1,-1,3])
+  vc2 = VectorClock([0,0,1])
+  #print(vc1.compare(vc2))
+
+  print('new clock')
+  print(vc1.compute_new(vc2).get_value())
