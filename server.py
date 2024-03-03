@@ -32,6 +32,8 @@ class Server:
     server.wait_for_termination()
 
   def send_message_to_servers(self):
+    port_1 = 0
+    port_2 = 0
     if self._document_service.send_command():
       if (self._server_id == 1):
         port_1 = '50052'
@@ -55,8 +57,12 @@ class Server:
       stub = document_pb2_grpc.ServerCommunicationServiceStub(channel)
       response = self.get_response(stub)
       print(f"Respuesta del servidor: {response}")
-    except:
-      print('Servers down')
+    except grpc.RpcError as e:
+      print(f"Error al enviar mensaje al servidor {port}: {e}")
+      self._notify_error(e, port)
+
+  def _notify_error(self, error, port):
+    print('ERROR !!!')
 
   def get_response(self, stub):
     ops_array = self._crdt_array.get_operations_array()

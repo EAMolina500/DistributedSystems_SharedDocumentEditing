@@ -24,12 +24,6 @@ if __name__ == "__main__":
   client_2.send_command_with_params(command='insert', position=3, character='D')
   time.sleep(3)
 
-  client_1.send_command_with_params(command='insert', position=4, character='E')
-  time.sleep(3)
-
-  client_2.send_command_with_params(command='insert', position=5, character='F')
-  time.sleep(3)
-
   """
   text = list('Finalmente!')
   index = -1

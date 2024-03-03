@@ -103,10 +103,10 @@ class RGA:
       if self._document is None:
         self._document = document.Document(name, self._server_id)
         self._document.create()
-      else:
-        print('Se permite crear un unico documento y el mismo ya fue creado')
     except:
+      print('ERROR !!!')
       print('Error al crear el archivo')
+      print('ERROR !!!')
 
   def get_value(self):
     self.apply_operations()
