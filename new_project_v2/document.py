@@ -53,7 +53,7 @@ class Document:
     self._operations.append(Operation('insert', int(index), char))
 
   def delete_by_index(self, index):
-    self._operations.append(Operation('delete', int(index)))
+    self._operations.append(Operation('delete', int(index), None))
 
   def display(self):
     print('Document content:')

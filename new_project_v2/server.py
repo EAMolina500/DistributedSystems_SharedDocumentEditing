@@ -33,7 +33,7 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     self.document.apply_operations()
     self.document.display()
 
-    self.send_to_other_servers('delete', request.index)
+    self.send_to_other_servers('delete', request.index, None)
 
     return document_pb2.Response(message='The delete command sent by client was applied')
 

@@ -10,19 +10,28 @@ import sys
 def run(server_id, server_port):
   with grpc.insecure_channel('localhost:' + server_port) as channel:
     stub = document_pb2_grpc.DocumentServiceStub(channel)
-    params = get_params()
-    if (params['command'] == 'insert'):
+    params = {}
+    command = input('Enter a command: ')
+    if (command == 'insert'):
+      params = get_insert_params()
       response = stub.InsertCommand(document_pb2.Insert(index=params['index'], char=params['char']))
-    elif (params['command'] == 'delete'):
+    elif (command == 'delete'):
+      params = get_delete_params()
       response = stub.DeleteCommand(document_pb2.Delete(index=params['index']))
 
     print("Document client received: " + response.message)
 
-def get_params():
+def get_insert_params():
   params = {
-    'command': input('Enter a command: '),
     'index': int(input('Enter an index: ')),
     'char': input('Enter a char: ')
+  }
+
+  return params
+
+def get_delete_params():
+  params = {
+    'index': int(input('Enter an index: '))
   }
 
   return params
