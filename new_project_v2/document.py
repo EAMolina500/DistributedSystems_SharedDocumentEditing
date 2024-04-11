@@ -3,13 +3,17 @@ class Operation:
     self._name = ''
     self._index = -1
     self._char = ''
+    self._vector_clock = [0,0,0]
+    self._replica_id = ''
     self._applied = False
     self._deleted = False
 
-  def __init__(self, name, index, char):
+  def __init__(self, name, index, char, vector_clock, replica_id):
     self._name = name
     self._index = index
     self._char = char
+    self._vector_clock = vector_clock
+    self._replica_id = replica_id
     self._applied = False
     self._deleted = name == 'delete'
 
@@ -48,11 +52,11 @@ class Document:
     self._operations = []
     self._server_id = server_id
 
-  def insert_by_index(self, index, char):
-    self._operations.append(Operation('insert', int(index), char))
+  def insert_by_index(self, index, char, vector_clock, replica_id):
+    self._operations.append(Operation('insert', int(index), char, vector_clock, replica_id))
 
-  def delete_by_index(self, index):
-    self._operations.append(Operation('delete', int(index), None))
+  def delete_by_index(self, index, vector_clock, replica_id):
+    self._operations.append(Operation('delete', int(index), None, vector_clock, replica_id))
 
   def display(self):
     print('Document content:')
