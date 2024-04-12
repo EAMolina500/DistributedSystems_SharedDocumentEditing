@@ -34,7 +34,7 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     self._vector_clock[self.server_id - 1] += 1
     replica_id = self.gen_replica_id()
 
-    self.document.insert_by_index(request.index, request.char, self._vector_clock, replica_id)
+    self.document.insert(request.index, request.char, self._vector_clock, replica_id)
     self.document.apply_operations()
     self.document.display()
 
@@ -48,7 +48,7 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     self._vector_clock[self.server_id - 1] += 1
     replica_id = self.gen_replica_id()
 
-    self.document.delete_by_index(request.index, self._vector_clock, replica_id)
+    self.document.delete(request.index, self._vector_clock, replica_id)
     self.document.apply_operations()
     self.document.display()
 
@@ -60,18 +60,12 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
   def SendInsert(self, request, context):
     print('El server envio: %s' % request)
 
-    sent_vector_clock = list(request.timestamp)
-    comp_result = compare(self._vector_clock, sent_vector_clock)
-    print('RESULT:')
-    print(comp_result)
-    print(self._vector_clock)
-    print(sent_vector_clock)
-
     self._vector_clock[self.server_id - 1] += 1
+    sent_vector_clock = list(request.timestamp)
     self._vector_clock = compute_new(self._vector_clock, sent_vector_clock)
 
     # es el sent_vector el que debo mandar ???
-    self.document.insert_by_index(request.index, request.char, sent_vector_clock, request.replica_id)
+    self.document.insert(request.index, request.char, sent_vector_clock, request.replica_id)
     self.document.apply_operations()
     self.document.display()
     return document_pb2.Response(message='The insert command sent by server was applied')
@@ -84,7 +78,7 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     self._vector_clock = compute_new(self._vector_clock, sent_vector_clock)
 
     # es el sent_vector el que debo mandar ???
-    self.document.delete_by_index(request.index, sent_vector_clock, request.replica_id)
+    self.document.delete(request.index, sent_vector_clock, request.replica_id)
     self.document.apply_operations()
     self.document.display()
     return document_pb2.Response(message='The delete command sent by server was applied')
@@ -116,18 +110,6 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
 
 def compute_new(clock1, clock2):
   return [max(a, b) for a, b in zip(clock1, clock2)]
-
-def compare(clock1, clock2):
-  differences = [a - b for a, b in zip(clock1, clock2)]
-
-  if all(diff == 0 for diff in differences):
-    return 'equal'
-  elif all(diff >= 0 for diff in differences):
-    return 'clock1'
-  elif all(diff <= 0 for diff in differences):
-    return 'clock2'
-  else:
-    return 'conflict'
 
 def serve(server_id, port):
   #port = "50051"

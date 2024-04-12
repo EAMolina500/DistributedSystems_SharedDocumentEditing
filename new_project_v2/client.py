@@ -36,14 +36,13 @@ def get_delete_params():
 
   return params
 
-def run_for_test(server_port, command, index, char):
+def run_for_test(server_id, command, index, char, server_port):
   with grpc.insecure_channel('localhost:' + server_port) as channel:
     stub = document_pb2_grpc.DocumentServiceStub(channel)
-    #params = get_params()
     if (command == 'insert'):
-      response = stub.InsertCommand(document_pb2.Operation(name=command, index=index, char=char))
+      response = stub.InsertCommand(document_pb2.Insert(index=index, char=char))
     elif (command == 'delete'):
-      response = stub.DeleteCommand(document_pb2.Operation(name=command, index=index))
+      response = stub.DeleteCommand(document_pb2.Delete(index=index))
 
     print("Document client received: " + response.message)
 
