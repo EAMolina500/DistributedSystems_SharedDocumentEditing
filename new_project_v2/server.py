@@ -11,23 +11,23 @@ import sys
 
 class DocumentService(document_pb2_grpc.DocumentServiceServicer):
   def __init__(self, server_id):
-    self.document = doc.Document(server_id)
-    self.server_id = int(server_id)
+    self._document = doc.Document(server_id)
+    self._server_id = int(server_id)
     self._vector_clock = [0,0,0]
     self._ops_number = 0
-    self._file = file.File(self.document._file_name)
+    self._file = file.File(self._document._file_name)
 
     ops = self._file.from_file_to_array()
-    self.document.set_operations(ops)
+    self._document.set_operations(ops)
 
   def gen_replica_id(self):
     self._ops_number += 1
     replica_id = str(self._ops_number)
-    if (self.server_id == 1):
+    if (self._server_id == 1):
       replica_id += 'A'
-    elif (self.server_id == 2):
+    elif (self._server_id == 2):
       replica_id += 'B'
-    elif (self.server_id == 3):
+    elif (self._server_id == 3):
       replica_id += 'C'
 
     return replica_id
@@ -36,28 +36,28 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
   def InsertCommand(self, request, context):
     print('El client envio: %s' % request)
 
-    self._vector_clock[self.server_id - 1] += 1
+    self._vector_clock[self._server_id - 1] += 1
     replica_id = self.gen_replica_id()
 
-    self.document.insert(request.index, request.char, self._vector_clock, replica_id)
-    self.document.apply_operations()
-    self.document.display()
+    self._document.insert(request.index, request.char, self._vector_clock, replica_id)
+    self._document.apply_operations()
+    self._document.display()
 
-    send_to_other_servers('insert', request.index, request.char, self._vector_clock, replica_id, self.server_id)
+    send_to_other_servers('insert', request.index, request.char, self._vector_clock, replica_id, self._server_id)
 
     return document_pb2.Response(message='The insert command sent by client was applied')
 
   def DeleteCommand(self, request, context):
     print('El client envio: %s' % request)
 
-    self._vector_clock[self.server_id - 1] += 1
+    self._vector_clock[self._server_id - 1] += 1
     replica_id = self.gen_replica_id()
 
-    self.document.delete(request.index, self._vector_clock, replica_id)
-    self.document.apply_operations()
-    self.document.display()
+    self._document.delete(request.index, self._vector_clock, replica_id)
+    self._document.apply_operations()
+    self._document.display()
 
-    send_to_other_servers('delete', request.index, None, self._vector_clock, replica_id, self.server_id)
+    send_to_other_servers('delete', request.index, None, self._vector_clock, replica_id, self._server_id)
 
     return document_pb2.Response(message='The delete command sent by client was applied')
 
@@ -65,27 +65,27 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
   def SendInsert(self, request, context):
     print('El server envio: %s' % request)
 
-    self._vector_clock[self.server_id - 1] += 1
+    self._vector_clock[self._server_id - 1] += 1
     sent_vector_clock = list(request.timestamp)
     self._vector_clock = compute_new(self._vector_clock, sent_vector_clock)
 
     # es el sent_vector el que debo mandar ???
-    self.document.insert(request.index, request.char, sent_vector_clock, request.replica_id)
-    self.document.apply_operations()
-    self.document.display()
+    self._document.insert(request.index, request.char, sent_vector_clock, request.replica_id)
+    self._document.apply_operations()
+    self._document.display()
     return document_pb2.Response(message='The insert command sent by server was applied')
 
   def SendDelete(self, request, context):
     print('El server envio: %s' % request)
 
-    self._vector_clock[self.server_id - 1] += 1
+    self._vector_clock[self._server_id - 1] += 1
     sent_vector_clock = list(request.timestamp)
     self._vector_clock = compute_new(self._vector_clock, sent_vector_clock)
 
     # es el sent_vector el que debo mandar ???
-    self.document.delete(request.index, sent_vector_clock, request.replica_id)
-    self.document.apply_operations()
-    self.document.display()
+    self._document.delete(request.index, sent_vector_clock, request.replica_id)
+    self._document.apply_operations()
+    self._document.display()
     return document_pb2.Response(message='The delete command sent by server was applied')
 
 
