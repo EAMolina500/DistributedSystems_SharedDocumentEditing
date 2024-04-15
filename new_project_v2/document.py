@@ -6,7 +6,8 @@ class Document:
     self._content = []
     self._operations = []
     self._server_id = server_id
-    self._file = file.File([])
+    self._file_name = 'server_' + str(self._server_id) + '_file'
+    self._file = file.File(self._file_name)
 
   def get_operations(self):
     return self._operations
@@ -23,7 +24,7 @@ class Document:
       incoming_op.set_applied(True)
       self._file.insert_operation(incoming_op)
 
-    self._file.from_array_to_file('server_' + str(self._server_id) + '_file')
+    self._file.from_array_to_file(self._operations)
 
     #self._operations.append(Operation('insert', int(index), char, vector_clock, replica_id))
 
@@ -36,7 +37,8 @@ class Document:
       incoming_op.set_applied(True)
       self._file.insert_operation(incoming_op)
 
-    self._file.from_array_to_file('server_' + str(self._server_id) + '_file')
+    self._file.from_array_to_file(self._operations)
+
 
   def display(self):
     print('Document content:')
