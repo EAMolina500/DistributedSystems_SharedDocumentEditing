@@ -11,26 +11,8 @@ class File:
   # No deberia dejar escribir en cualquier posicion
   # Debo poder escribir al lado de un caracter (al menos el espacio en blanco)
   # o al principio de una nueva linea
-  def insert_char(self, char, pos):
-    new_item = (char, True)
-
-    self.array.insert(pos, new_item)
-    """
-    if pos >= len(self.array):
-      self.array.append(new_item)
-    else:
-      if not self.array[pos]:
-        self.array[pos] = new_item
-      elif self.array[pos] != new_item:
-        self.array = self.array[:pos] + [new_item] + self.array[pos:]
-    """
-
-  def delete_char(self, pos):
-    if self.array[pos]:
-      aux_array = list(self.array[pos])
-      if aux_array[1]:
-        aux_array[1] = False
-      self.array[pos] = tuple(aux_array)
+  def insert_operation(self, operation):
+    self.array.append(operation)
 
   def print_array(self):
     print(self.array)
@@ -43,9 +25,9 @@ class File:
 
   def from_array_to_file(self, file_name):
     with open(file_name + '.txt', 'w') as file:
-      for tup in self.array:
-        if tup:
-          file.write(f"({tup[0]}, {tup[1]})\n")
+      for op in self.array:
+        if op:
+          file.write(repr(op) + '\n')
 
   def parse_line(self, line):
     (key, value) = line.strip()[1:-1].split(", ")
@@ -53,9 +35,12 @@ class File:
 
   def from_file_to_array(self, file_name):
     self.array = []
-    with open(file_name + '.txt', 'r') as file:
-      for line in file:
-        self.array.append(self.parse_line(line))
+    try:
+      with open(file_name + '.txt', 'r') as file:
+        for line in file:
+          self.array.append(self.parse_line(line))
+    except:
+      print("File doesn't exist")
 
   def create(self, name):
     try:

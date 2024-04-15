@@ -20,8 +20,8 @@ class Document:
 
     #for op in self._operations:
     if not incoming_op.get_applied():
-      self._file.insert_char(incoming_op.get_char(), incoming_op.get_index())
       incoming_op.set_applied(True)
+      self._file.insert_operation(incoming_op)
 
     self._file.from_array_to_file('server_' + str(self._server_id) + '_file')
 
@@ -33,8 +33,8 @@ class Document:
 
     #for op in self._operations:
     if not incoming_op.get_applied():
-      self._file.delete_char(incoming_op.get_index())
       incoming_op.set_applied(True)
+      self._file.insert_operation(incoming_op)
 
     self._file.from_array_to_file('server_' + str(self._server_id) + '_file')
 
