@@ -84,16 +84,19 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     return document_pb2.Response(message='The delete command sent by server was applied')
 
   def send_to_other_server(self, command, index, char, port, timestamp, replica_id):
-    with grpc.insecure_channel('localhost:' + port) as channel:
-      stub = document_pb2_grpc.DocumentServiceStub(channel)
-      if (command == 'insert'):
-        #falta agregar replica_id
-        response = stub.SendInsert(document_pb2.InsertParams(index=int(index), char=char, server_id=self.server_id, tumbstamp=False, timestamp=timestamp, replica_id=replica_id))
-      elif (command == 'delete'):
-        #falta agregar replica_id
-        response = stub.SendDelete(document_pb2.DeleteParams(index=int(index), server_id=self.server_id, tumbstamp=True, timestamp=timestamp, replica_id=replica_id))
+    try:
+      with grpc.insecure_channel('localhost:' + port) as channel:
+        stub = document_pb2_grpc.DocumentServiceStub(channel)
+        if (command == 'insert'):
+          #falta agregar replica_id
+          response = stub.SendInsert(document_pb2.InsertParams(index=int(index), char=char, server_id=self.server_id, tumbstamp=False, timestamp=timestamp, replica_id=replica_id))
+        elif (command == 'delete'):
+          #falta agregar replica_id
+          response = stub.SendDelete(document_pb2.DeleteParams(index=int(index), server_id=self.server_id, tumbstamp=True, timestamp=timestamp, replica_id=replica_id))
 
-      print("Document client received: " + response.message)
+        print("Document client received: " + response.message)
+    except:
+      print("server doesn't works")
 
   def send_to_other_servers(self, command, index, char, timestamp, replica_id):
     if (self.server_id == 1):
