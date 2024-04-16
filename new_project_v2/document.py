@@ -19,26 +19,21 @@ class Document:
     incoming_op = op.Operation('insert', int(index), char, vector_clock, replica_id)
     self._operations = compare_and_order_operations(self._operations, [incoming_op])
 
-    #for op in self._operations:
     if not incoming_op.get_applied():
       incoming_op.set_applied(True)
       self._file.insert_operation(incoming_op)
 
     self._file.from_array_to_file(self._operations)
-
-    #self._operations.append(Operation('insert', int(index), char, vector_clock, replica_id))
 
   def delete(self, index, vector_clock, replica_id):
     incoming_op = op.Operation('delete', int(index), None, vector_clock, replica_id)
     self._operations = compare_and_order_operations(self._operations, [incoming_op])
 
-    #for op in self._operations:
     if not incoming_op.get_applied():
       incoming_op.set_applied(True)
       self._file.insert_operation(incoming_op)
 
     self._file.from_array_to_file(self._operations)
-
 
   def display(self):
     print('Document content:')

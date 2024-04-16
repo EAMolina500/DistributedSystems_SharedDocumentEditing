@@ -69,7 +69,6 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     sent_vector_clock = list(request.timestamp)
     self._vector_clock = compute_new(self._vector_clock, sent_vector_clock)
 
-    # es el sent_vector el que debo mandar ???
     self._document.insert(request.index, request.char, sent_vector_clock, request.replica_id)
     self._document.apply_operations()
     self._document.display()
@@ -82,7 +81,6 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     sent_vector_clock = list(request.timestamp)
     self._vector_clock = compute_new(self._vector_clock, sent_vector_clock)
 
-    # es el sent_vector el que debo mandar ???
     self._document.delete(request.index, sent_vector_clock, request.replica_id)
     self._document.apply_operations()
     self._document.display()
@@ -120,7 +118,6 @@ def compute_new(clock1, clock2):
   return [max(a, b) for a, b in zip(clock1, clock2)]
 
 def serve(server_id, port):
-  #port = "50051"
   document = DocumentService(server_id)
   server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
   document_pb2_grpc.add_DocumentServiceServicer_to_server(document, server)
