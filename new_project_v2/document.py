@@ -9,6 +9,12 @@ class Document:
     self._file_name = 'server_' + str(self._server_id) + '_file'
     self._file = file.File(self._file_name)
 
+    if not self._file.is_empty():
+      self._operations = self._file.get_content()
+
+  #def get_file_name(self):
+  #  return self._file_name
+
   def get_operations(self):
     return self._operations
 
@@ -17,23 +23,29 @@ class Document:
 
   def insert(self, index, char, vector_clock, replica_id):
     incoming_op = op.Operation('insert', int(index), char, vector_clock, replica_id)
-    self._operations = compare_and_order_operations(self._operations, [incoming_op])
+    #self._operations = compare_and_order_operations(self._operations, [incoming_op])
+    self._operations = insert_operation(self._operations, incoming_op)
 
-    if not incoming_op.get_applied():
-      incoming_op.set_applied(True)
-      self._file.insert_operation(incoming_op)
+    self._file.insert_operation(incoming_op)
 
-    self._file.from_array_to_file(self._operations)
+    #if not incoming_op.get_applied():
+      #incoming_op.set_applied(True)
+      #self._file.from_array_to_file(self._operations)
+
+    #self._file.from_array_to_file(self._operations)
 
   def delete(self, index, vector_clock, replica_id):
     incoming_op = op.Operation('delete', int(index), None, vector_clock, replica_id)
-    self._operations = compare_and_order_operations(self._operations, [incoming_op])
+    #self._operations = compare_and_order_operations(self._operations, [incoming_op])
+    self._operations = insert_operation(self._operations, incoming_op)
 
-    if not incoming_op.get_applied():
-      incoming_op.set_applied(True)
-      self._file.insert_operation(incoming_op)
+    self._file.insert_operation(incoming_op)
+    #if not incoming_op.get_applied():
+      #incoming_op.set_applied(True)
+      #self._file.from_array_to_file(self._operations)
+      #self._file.insert_operation(incoming_op)
 
-    self._file.from_array_to_file(self._operations)
+    #self._file.from_array_to_file(self._operations)
 
   def display(self):
     print('Document content:')
@@ -63,6 +75,45 @@ def compare(clock1, clock2):
     return 'clock2'
   else:
     return 'conflict'
+
+def insert_operation(ordered_operations, new_operation):
+  """
+  Inserts a new operation into an already ordered list based on vector clocks and replica IDs.
+
+  Args:
+    ordered_operations (list[Operation]): Ordered list of operations.
+    new_operation (Operation): The operation to insert.
+
+  Returns:
+    list[Operation]: The updated ordered list with the new operation inserted.
+  """
+  if ordered_operations is None:
+    # Handle the case where the initial list is empty
+    return [new_operation]
+
+  insertion_index = 0
+  for existing_op in ordered_operations:
+    comparison = compare(new_operation.get_clock(), existing_op.get_clock())
+    if comparison == 'equal':
+      # If clocks are equal, insert before the existing operation (stability)
+      insertion_index = ordered_operations.index(existing_op)
+      break
+    elif comparison == 'clock1':  # new_operation's clock is greater
+      insertion_index = ordered_operations.index(existing_op) + 1
+      break
+    elif comparison == 'clock2':  # existing operation's clock is greater
+      continue
+    else:  # Conflict: compare by replica ID
+      if new_operation.get_replica_id() < existing_op.get_replica_id():
+        insertion_index = ordered_operations.index(existing_op)
+        break
+      else:
+        continue
+
+  # Insert the new operation at the determined index
+  ordered_operations.insert(insertion_index, new_operation)
+
+  return ordered_operations
 
 def compare_and_order_operations(document_operations, incoming_operations):
   """

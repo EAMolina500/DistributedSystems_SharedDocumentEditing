@@ -2,14 +2,22 @@ class File:
   def __init__(self, file_name):
     self._name = file_name + '.txt'
     self._file = None
+    self._content = None
     try:
       self._file = open(self._name, "x")
       self._file.close()
     except:
-      print('File already exists')
+      #print('File already exists')
+      self._content = self.from_file_to_array()
+
+  def get_content(self):
+    return self._content
+
+  def is_empty(self):
+    return self._content == None
 
   def insert_operation(self, operation):
-    with open(self._name, 'w') as file:
+    with open(self._name, 'a') as file:
       if operation:
         file.write(f"{repr(operation)}\n")
         file.close()

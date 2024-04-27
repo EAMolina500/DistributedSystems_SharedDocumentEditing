@@ -5,7 +5,6 @@ import document_pb2
 import document_pb2_grpc
 
 import document as doc
-import file
 
 import sys
 
@@ -15,10 +14,6 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     self._server_id = int(server_id)
     self._vector_clock = [0,0,0]
     self._ops_number = 0
-    self._file = file.File(self._document._file_name)
-
-    ops = self._file.from_file_to_array()
-    self._document.set_operations(ops)
 
   def gen_replica_id(self):
     self._ops_number += 1
