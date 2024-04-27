@@ -35,6 +35,7 @@ class Document:
 
   def apply_operations(self):
     for op in self._operations:
+      # error aca, pero no es tan importante
       if not op.get_applied():
         if op.get_name() == 'insert':
           self._content.insert(op.get_index(), op.get_char())

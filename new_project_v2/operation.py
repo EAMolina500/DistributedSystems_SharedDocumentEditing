@@ -18,7 +18,8 @@ class Operation:
     self._deleted = name == 'delete'
 
   def __repr__(self):
-    return f"Name: {self._name}, Index: {self._index}, Char: {self._char}, Vector Clock: {self._vector_clock}, Replica ID: {self._replica_id}, Applied?: {self._applied}, Deleted?: {self._deleted}\n"
+    return f"{self._name}/{self._index}/{self._char}/{self._vector_clock}/{self._replica_id}/{self._applied}/{self._deleted}\n"
+    #return f"Name: {self._name}, Index: {self._index}, Char: {self._char}, Vector Clock: {self._vector_clock}, Replica ID: {self._replica_id}, Applied?: {self._applied}, Deleted?: {self._deleted}\n"
 
   def get_name(self):
     return self._name
