@@ -7,8 +7,16 @@ class File:
       self._file = open(self._name, "x")
       self._file.close()
     except:
-      #print('File already exists')
-      self._content = self.from_file_to_array()
+      self.get_content_from_file()
+
+  def get_content_from_file(self):
+    try:
+      with open(self._name, 'r') as file:
+        for line in file:
+          self._content.append(self.parse_line(line))
+        file.close()
+    except:
+      print("File doesn't exist")
 
   def get_content(self):
     return self._content
@@ -21,13 +29,14 @@ class File:
       if operation:
         file.write(f"{repr(operation)}\n")
         file.close()
-
+  """
   def from_array_to_file(self, array):
     with open(self._name, 'w') as file:
       for op in array:
         if op:
           file.write(f"{repr(op)}\n")
       file.close()
+  """
 
   def parse_line(self, line):
     """Parses a line of text representing an operation into its corresponding object.
@@ -60,15 +69,3 @@ class File:
     operation_obj = Operation(operation_name, index, char, vector_clock, replica_id)
 
     return operation_obj
-
-
-  def from_file_to_array(self):
-    array = []
-    try:
-      with open(self._name, 'r') as file:
-        for line in file:
-          array.append(self.parse_line(line))
-        file.close()
-      return array
-    except:
-      print("File doesn't exist")

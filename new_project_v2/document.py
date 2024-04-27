@@ -12,9 +12,6 @@ class Document:
     if not self._file.is_empty():
       self._operations = self._file.get_content()
 
-  #def get_file_name(self):
-  #  return self._file_name
-
   def get_operations(self):
     return self._operations
 
@@ -23,29 +20,13 @@ class Document:
 
   def insert(self, index, char, vector_clock, replica_id):
     incoming_op = op.Operation('insert', int(index), char, vector_clock, replica_id)
-    #self._operations = compare_and_order_operations(self._operations, [incoming_op])
     self._operations = insert_operation(self._operations, incoming_op)
-
     self._file.insert_operation(incoming_op)
-
-    #if not incoming_op.get_applied():
-      #incoming_op.set_applied(True)
-      #self._file.from_array_to_file(self._operations)
-
-    #self._file.from_array_to_file(self._operations)
 
   def delete(self, index, vector_clock, replica_id):
     incoming_op = op.Operation('delete', int(index), None, vector_clock, replica_id)
-    #self._operations = compare_and_order_operations(self._operations, [incoming_op])
     self._operations = insert_operation(self._operations, incoming_op)
-
     self._file.insert_operation(incoming_op)
-    #if not incoming_op.get_applied():
-      #incoming_op.set_applied(True)
-      #self._file.from_array_to_file(self._operations)
-      #self._file.insert_operation(incoming_op)
-
-    #self._file.from_array_to_file(self._operations)
 
   def display(self):
     print('Document content:')
