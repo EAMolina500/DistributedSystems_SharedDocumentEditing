@@ -11,6 +11,8 @@ class Document:
 
     if not self._file.is_empty():
       self._operations = self._file.get_content()
+      print('operations')
+      print(self._operations)
 
   def get_operations(self):
     return self._operations

@@ -9,14 +9,21 @@ class File:
       self._file = open(self._name, 'x')
       self._file.close()
     except FileExistsError:
+      print('Constructor exception')
       self.get_content_from_file()
 
   def get_content_from_file(self):
     try:
       with open(self._name, 'r') as file:
         for line in file:
-          self._content.append(self.parse_line(line))
+          print('line')
+          print(line)
+          parsed_line = self.parse_line(line)
+          if parsed_line:
+            self._content.append(parsed_line)
         file.close()
+        print('get content from file')
+        print(self._content)
     except FileExistsError:
       print(self._name)
       print("File doesn't exist")
