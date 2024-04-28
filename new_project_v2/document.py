@@ -41,8 +41,10 @@ class Document:
       if not op.get_applied():
         if op.get_name() == 'insert':
           self._content.insert(op.get_index(), op.get_char())
+          op.set_applied(True)
         elif op.get_name() == 'delete':
           del(self._content[op.get_index()])
+          op.set_applied(True)
 
       op.set_applied(True)
 
