@@ -1,5 +1,13 @@
 import unittest
+import sys
+import os
+
+current = os.path.dirname(os.path.realpath(__file__))
+parent = os.path.dirname(current)
+sys.path.append(parent)
+
 from operation import Operation
+
 
 class OperationTest(unittest.TestCase):
   """Test class for the Operation class."""

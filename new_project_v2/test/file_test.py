@@ -1,8 +1,14 @@
 import unittest
 from unittest.mock import patch, MagicMock  # For mocking file operations
 
-import operation as op
-from file import File  # Assuming file.py is in the same directory
+import sys
+import os
+
+current = os.path.dirname(os.path.realpath(__file__))
+parent = os.path.dirname(current)
+sys.path.append(parent)
+
+from file import File
 
 
 class FileTest(unittest.TestCase):
