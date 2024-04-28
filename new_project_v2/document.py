@@ -1,4 +1,4 @@
-import operation as op
+from operation import Operation
 import file
 
 class Document:
@@ -21,12 +21,12 @@ class Document:
     self._operations = operations
 
   def insert(self, index, char, vector_clock, replica_id):
-    incoming_op = op.Operation('insert', int(index), char, vector_clock, replica_id)
+    incoming_op = Operation('insert', int(index), char, vector_clock, replica_id)
     self._operations = insert_operation(self._operations, incoming_op)
     self._file.insert_operation(incoming_op)
 
   def delete(self, index, vector_clock, replica_id):
-    incoming_op = op.Operation('delete', int(index), None, vector_clock, replica_id)
+    incoming_op = Operation('delete', int(index), None, vector_clock, replica_id)
     self._operations = insert_operation(self._operations, incoming_op)
     self._file.insert_operation(incoming_op)
 
@@ -37,7 +37,6 @@ class Document:
 
   def apply_operations(self):
     for op in self._operations:
-      # error aca, pero no es tan importante
       if not op.get_applied():
         if op.get_name() == 'insert':
           self._content.insert(op.get_index(), op.get_char())

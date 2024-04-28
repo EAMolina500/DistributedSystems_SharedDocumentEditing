@@ -4,13 +4,13 @@ import grpc
 import document_pb2
 import document_pb2_grpc
 
-import document as doc
+from document import Document
 
 import sys
 
 class DocumentService(document_pb2_grpc.DocumentServiceServicer):
   def __init__(self, server_id):
-    self._document = doc.Document(server_id)
+    self._document = Document(server_id)
     self._server_id = int(server_id)
     self._vector_clock = [0,0,0]
     self._ops_number = 0

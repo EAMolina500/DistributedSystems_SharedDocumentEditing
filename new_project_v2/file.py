@@ -1,4 +1,4 @@
-import operation as op
+from operation import Operation
 
 class File:
   def __init__(self, file_name):
@@ -39,14 +39,6 @@ class File:
       if operation:
         file.write(f"{repr(operation)}\n")
         file.close()
-  """
-  def from_array_to_file(self, array):
-    with open(self._name, 'w') as file:
-      for op in array:
-        if op:
-          file.write(f"{repr(op)}\n")
-      file.close()
-  """
 
   def parse_line(self, line):
     """Parses a line of text representing an operation into its corresponding object.
@@ -79,6 +71,6 @@ class File:
       applied = False  # Assuming applied is initially False
 
       # Create an Operation object and set its attributes
-      operation_obj = op.Operation(operation_name, index, char, vector_clock, replica_id)
+      operation_obj = Operation(operation_name, index, char, vector_clock, replica_id)
 
     return operation_obj
