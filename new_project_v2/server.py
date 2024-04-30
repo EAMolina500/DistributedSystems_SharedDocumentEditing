@@ -5,14 +5,15 @@ import document_pb2
 import document_pb2_grpc
 
 from document import Document
+from vector_clock import VectorClock
 
 import sys
 
 class DocumentService(document_pb2_grpc.DocumentServiceServicer):
   def __init__(self, server_id):
     self._document = Document(server_id)
+    self._vector_clock = VectorClock(server_id)
     self._server_id = int(server_id)
-    self._vector_clock = [0,0,0]
     self._ops_number = 0
 
   def gen_replica_id(self):
@@ -31,28 +32,28 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
   def InsertCommand(self, request, context):
     print('El client envio: %s' % request)
 
-    self._vector_clock[self._server_id - 1] += 1
+    self._vector_clock.increment()
     replica_id = self.gen_replica_id()
 
     self._document.insert(request.index, request.char, self._vector_clock, replica_id)
     self._document.apply_operations()
     self._document.display()
 
-    send_to_other_servers('insert', request.index, request.char, self._vector_clock, replica_id, self._server_id)
+    send_to_other_servers('insert', request.index, request.char, self._vector_clock.get_clock(), replica_id, self._server_id)
 
     return document_pb2.Response(message='The insert command sent by client was applied')
 
   def DeleteCommand(self, request, context):
     print('El client envio: %s' % request)
 
-    self._vector_clock[self._server_id - 1] += 1
+    self._vector_clock.increment()
     replica_id = self.gen_replica_id()
 
     self._document.delete(request.index, self._vector_clock, replica_id)
     self._document.apply_operations()
     self._document.display()
 
-    send_to_other_servers('delete', request.index, None, self._vector_clock, replica_id, self._server_id)
+    send_to_other_servers('delete', request.index, None, self._vector_clock.get_clock(), replica_id, self._server_id)
 
     return document_pb2.Response(message='The delete command sent by client was applied')
 
@@ -60,9 +61,9 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
   def SendInsert(self, request, context):
     print('El server envio: %s' % request)
 
-    self._vector_clock[self._server_id - 1] += 1
-    sent_vector_clock = list(request.timestamp)
-    self._vector_clock = compute_new(self._vector_clock, sent_vector_clock)
+    self._vector_clock.increment()
+    sent_vector_clock = VectorClock(list(request.timestamp))
+    self._vector_clock = self._vector_clock.compute_new(sent_vector_clock)
 
     self._document.insert(request.index, request.char, sent_vector_clock, request.replica_id)
     self._document.apply_operations()
@@ -72,9 +73,9 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
   def SendDelete(self, request, context):
     print('El server envio: %s' % request)
 
-    self._vector_clock[self._server_id - 1] += 1
-    sent_vector_clock = list(request.timestamp)
-    self._vector_clock = compute_new(self._vector_clock, sent_vector_clock)
+    self._vector_clock.increment()
+    sent_vector_clock = VectorClock(list(request.timestamp))
+    self._vector_clock = self._vector_clock.compute_new(sent_vector_clock)
 
     self._document.delete(request.index, sent_vector_clock, request.replica_id)
     self._document.apply_operations()
@@ -108,9 +109,6 @@ def send_to_other_servers(command, index, char, timestamp, replica_id, server_id
   elif (server_id == 3):
     send_to_other_server(command, index, char, '50051', timestamp, replica_id, server_id)
     send_to_other_server(command, index, char, '50052', timestamp, replica_id, server_id)
-
-def compute_new(clock1, clock2):
-  return [max(a, b) for a, b in zip(clock1, clock2)]
 
 def serve(server_id, port):
   document = DocumentService(server_id)
