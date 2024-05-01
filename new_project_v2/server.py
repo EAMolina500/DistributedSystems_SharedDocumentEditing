@@ -35,7 +35,7 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     self._vector_clock.increment()
     replica_id = self.gen_replica_id()
 
-    self._document.insert(request.index, request.char, self._vector_clock, replica_id)
+    self._document.insert(request.index, request.char, self._vector_clock.get_clock(), replica_id)
     self._document.apply_operations()
     self._document.display()
 
@@ -49,7 +49,7 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     self._vector_clock.increment()
     replica_id = self.gen_replica_id()
 
-    self._document.delete(request.index, self._vector_clock, replica_id)
+    self._document.delete(request.index, self._vector_clock.get_clock(), replica_id)
     self._document.apply_operations()
     self._document.display()
 
@@ -62,10 +62,11 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     print('El server envio: %s' % request)
 
     self._vector_clock.increment()
-    sent_vector_clock = VectorClock(list(request.timestamp))
-    self._vector_clock = self._vector_clock.compute_new(sent_vector_clock)
+    sent_vector_clock = VectorClock(self._server_id, list(request.timestamp))
+    # el valor computa queda guardado en el clock de self._vector_clock
+    self._vector_clock.compute_new(sent_vector_clock)
 
-    self._document.insert(request.index, request.char, sent_vector_clock, request.replica_id)
+    self._document.insert(request.index, request.char, sent_vector_clock.get_clock(), request.replica_id)
     self._document.apply_operations()
     self._document.display()
     return document_pb2.Response(message='The insert command sent by server was applied')
@@ -75,9 +76,10 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
 
     self._vector_clock.increment()
     sent_vector_clock = VectorClock(list(request.timestamp))
-    self._vector_clock = self._vector_clock.compute_new(sent_vector_clock)
+    # el valor computa queda guardado en el clock de self._vector_clock
+    self._vector_clock.compute_new(sent_vector_clock)
 
-    self._document.delete(request.index, sent_vector_clock, request.replica_id)
+    self._document.delete(request.index, sent_vector_clock.get_clock(), request.replica_id)
     self._document.apply_operations()
     self._document.display()
     return document_pb2.Response(message='The delete command sent by server was applied')

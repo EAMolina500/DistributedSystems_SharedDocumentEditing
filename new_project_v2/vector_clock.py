@@ -1,3 +1,5 @@
+#import pdb
+
 class VectorClock:
   def __init__(self, server_id, clock=[0,0,0]):
     self._server_id = server_id
@@ -17,11 +19,12 @@ class VectorClock:
     self._clock[index] += 1
 
   def compute_new(self, other_clock):
-    new_clock = [max(a, b) for a, b in zip(self.get_clock(), other_clock.get_clock())]
-    self.set_clock(new_clock)
+    #pdb.set_trace()
+    new_clock = [max(a, b) for a, b in zip(self._clock, other_clock.get_clock())]
+    self._clock = new_clock
 
   def compare(self, other_clock):
-    differences = [a - b for a, b in zip(self.get_clock(), other_clock.get_clock())]
+    differences = [a - b for a, b in zip(self._clock, other_clock.get_clock())]
 
     if all(diff == 0 for diff in differences):
       return 'equal'
