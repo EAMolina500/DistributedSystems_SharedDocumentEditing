@@ -12,9 +12,13 @@ import sys
 class DocumentService(document_pb2_grpc.DocumentServiceServicer):
   def __init__(self, server_id):
     self._document = Document(server_id)
-    self._vector_clock = VectorClock(server_id)
     self._server_id = int(server_id)
     self._ops_number = 0
+
+    if self._document.get_operations():
+      self._vector_clock = self._document.get_last_clock()
+    else:
+      self._vector_clock = VectorClock(server_id)
 
   def gen_replica_id(self):
     self._ops_number += 1
@@ -64,6 +68,7 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     self._vector_clock.increment()
     sent_vector_clock = VectorClock(self._server_id, list(request.timestamp))
     # el valor computa queda guardado en el clock de self._vector_clock
+    # actualizo el reloj local
     self._vector_clock.compute_new(sent_vector_clock)
 
     self._document.insert(request.index, request.char, sent_vector_clock.get_clock(), request.replica_id)
@@ -77,6 +82,7 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     self._vector_clock.increment()
     sent_vector_clock = VectorClock(list(request.timestamp))
     # el valor computa queda guardado en el clock de self._vector_clock
+    # actualizo el reloj local
     self._vector_clock.compute_new(sent_vector_clock)
 
     self._document.delete(request.index, sent_vector_clock.get_clock(), request.replica_id)

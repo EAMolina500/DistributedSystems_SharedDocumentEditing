@@ -1,4 +1,5 @@
 from operation import Operation
+from vector_clock import VectorClock
 import file
 
 class Document:
@@ -8,9 +9,12 @@ class Document:
     self._server_id = server_id
     self._file_name = 'server_' + str(self._server_id) + '_file'
     self._file = file.File(self._file_name)
+    self._last_clock = [0,0,0]
 
     if not self._file.is_empty():
       self._operations = self._file.get_content()
+      self._operations = compare_and_order_operations([], self._operations)
+      self.apply_operations()
       print('operations')
       print(self._operations)
 
@@ -20,12 +24,25 @@ class Document:
   def set_operations(self, operations):
     self._operations = operations
 
+  def get_last_clock(self):
+    greater_clock = [0,0,0]
+
+    for op in self._operations:
+      if op.get_clock() > greater_clock:
+        greater_clock = op.get_clock()
+
+    return VectorClock(self._server_id, greater_clock)
+
   def insert(self, index, char, vector_clock, replica_id):
+    # podria guardar esto en otro archivo
+    #self._last_clock = vector_clock
     incoming_op = Operation('insert', int(index), char, vector_clock, replica_id)
     self._operations = insert_operation(self._operations, incoming_op)
     self._file.insert_operation(incoming_op)
 
   def delete(self, index, vector_clock, replica_id):
+    # podria guardar esto en otro archivo
+    #self._last_clock = vector_clock
     incoming_op = Operation('delete', int(index), None, vector_clock, replica_id)
     self._operations = insert_operation(self._operations, incoming_op)
     self._file.insert_operation(incoming_op)
