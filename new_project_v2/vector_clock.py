@@ -24,10 +24,10 @@ class VectorClock:
     differences = [a - b for a, b in zip(self.get_clock(), other_clock.get_clock())]
 
     if all(diff == 0 for diff in differences):
-        return 'equal'
+      return 'equal'
     elif all(diff >= 0 for diff in differences):
-        return 'larger'
+      return 'larger'
     elif all(diff <= 0 for diff in differences):
-        return 'smaller'
+      return 'smaller'
     else:
-        return 'conflict'
+      return 'conflict'
