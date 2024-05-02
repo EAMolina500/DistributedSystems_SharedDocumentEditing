@@ -84,8 +84,6 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
 
     self._vector_clock.increment()
     sent_vector_clock = VectorClock(self._server_id, list(request.timestamp))
-    # el valor computa queda guardado en el clock de self._vector_clock
-    # actualizo el reloj local
     self._vector_clock.compute_new(sent_vector_clock)
 
     self._document.insert(request.index, request.char, sent_vector_clock.get_clock(), request.replica_id)
@@ -98,8 +96,6 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
 
     self._vector_clock.increment()
     sent_vector_clock = VectorClock(list(request.timestamp))
-    # el valor computa queda guardado en el clock de self._vector_clock
-    # actualizo el reloj local
     self._vector_clock.compute_new(sent_vector_clock)
 
     self._document.delete(request.index, sent_vector_clock.get_clock(), request.replica_id)
@@ -115,7 +111,7 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
       for op in ops:
         params.append(op_to_params(op, self._server_id))
 
-    return document_pb2.ParamsList(params=[])
+    return document_pb2.ParamsList(params=params)
 
 def op_to_params(op, server_id):
   return document_pb2.Params(
@@ -141,9 +137,6 @@ def request_pending_messages(document, port):
     with grpc.insecure_channel('localhost:' + port) as channel:
       stub = document_pb2_grpc.DocumentServiceStub(channel)
       response = stub.SendPendingMessages(document_pb2.Request(message="I'm up and running", server_port=port))
-      print('DESPUES DE ARMAR LA RESPONSE\n')
-      # paso la lista al document para que reemplace su lista desactualizada
-      #self._document.set_operations(request.params)
 
       ops = []
       for params in response.params:
@@ -151,7 +144,6 @@ def request_pending_messages(document, port):
         ops.append(op)
 
       document.set_operations(ops)
-      print("Pending params: " + "WAAA")
   except:
     print("server doesn't response")
 

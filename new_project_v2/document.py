@@ -22,9 +22,11 @@ class Document:
     return self._operations
 
   def set_operations(self, operations):
+    # solucion temporal
+    self._content = []
     self._operations = operations
     self.apply_operations()
-    print(self._content)
+    self.display()
 
   def get_last_clock(self):
     greater_clock = [0,0,0]
