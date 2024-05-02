@@ -35,6 +35,11 @@ class DocumentServiceStub(object):
                 request_serializer=document__pb2.DeleteParams.SerializeToString,
                 response_deserializer=document__pb2.Response.FromString,
                 )
+        self.SendPendingMessages = channel.unary_unary(
+                '/DocumentService/SendPendingMessages',
+                request_serializer=document__pb2.Request.SerializeToString,
+                response_deserializer=document__pb2.ParamsList.FromString,
+                )
 
 
 class DocumentServiceServicer(object):
@@ -67,6 +72,14 @@ class DocumentServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def SendPendingMessages(self, request, context):
+        """
+
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_DocumentServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -89,6 +102,11 @@ def add_DocumentServiceServicer_to_server(servicer, server):
                     servicer.SendDelete,
                     request_deserializer=document__pb2.DeleteParams.FromString,
                     response_serializer=document__pb2.Response.SerializeToString,
+            ),
+            'SendPendingMessages': grpc.unary_unary_rpc_method_handler(
+                    servicer.SendPendingMessages,
+                    request_deserializer=document__pb2.Request.FromString,
+                    response_serializer=document__pb2.ParamsList.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -166,5 +184,22 @@ class DocumentService(object):
         return grpc.experimental.unary_unary(request, target, '/DocumentService/SendDelete',
             document__pb2.DeleteParams.SerializeToString,
             document__pb2.Response.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def SendPendingMessages(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/DocumentService/SendPendingMessages',
+            document__pb2.Request.SerializeToString,
+            document__pb2.ParamsList.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

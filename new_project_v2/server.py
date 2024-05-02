@@ -14,11 +14,21 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     self._document = Document(server_id)
     self._server_id = int(server_id)
     self._ops_number = 0
+    # esto va a funcionar siempre que el server no se caiga
+    self._pending_msgs = {'50051': False, '50052': False, '50053': False}
 
     if self._document.get_operations():
       self._vector_clock = self._document.get_last_clock()
     else:
       self._vector_clock = VectorClock(server_id)
+
+    if (self._server_id == 1):
+      request_pending_messages('50052')
+    elif (self._server_id == 2):
+      request_pending_messages('50051')
+      #request_pending_messages('50053')
+    elif (self._server_id == 3):
+      request_pending_messages('50051')
 
   def gen_replica_id(self):
     self._ops_number += 1
@@ -43,7 +53,10 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     self._document.apply_operations()
     self._document.display()
 
-    send_to_other_servers('insert', request.index, request.char, self._vector_clock.get_clock(), replica_id, self._server_id)
+    try:
+      send_to_other_servers('insert', request.index, request.char, self._vector_clock.get_clock(), replica_id, self._server_id)
+    except:
+      self._pending_msgs[get_server_port(self._server_id)]
 
     return document_pb2.Response(message='The insert command sent by client was applied')
 
@@ -57,7 +70,10 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     self._document.apply_operations()
     self._document.display()
 
-    send_to_other_servers('delete', request.index, None, self._vector_clock.get_clock(), replica_id, self._server_id)
+    try:
+      send_to_other_servers('delete', request.index, None, self._vector_clock.get_clock(), replica_id, self._server_id)
+    except:
+      self._pending_msgs[get_server_port(self._server_id)]
 
     return document_pb2.Response(message='The delete command sent by client was applied')
 
@@ -90,6 +106,59 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     self._document.display()
     return document_pb2.Response(message='The delete command sent by server was applied')
 
+  # ...
+  def SendPendingMessages(self, request, context):
+    """
+    port = request.port
+    params = document_pb2.Params(
+      index=1,
+      char='X',
+      server_id=self._server_id,
+      tumbstamp=False,
+      timestamp=[0,0,0],
+      replica_id='1A'
+    )
+    params_list = [params]
+    print('PARAMS DONE!\n')
+
+    if (self._pending_msgs[port]):
+      print('ENTRE AL IF\n')
+      for op in self._document.get_operations():
+        params = document_pb2.Params(
+          index=op.get_index(),
+          char=op.get_char(),
+          server_id=self._server_id,
+          tumbstamp=op.get_deleted(),
+          timestamp=op.get_clock(),
+          replica_id=op.get_replica_id()
+        )
+        params_list.append(params)
+    print('TERMINE EL CICLO\n')
+    """
+    print('Request - server post:\n')
+    #print(request.server_port)
+    return document_pb2.ParamsList(message="Take missing operations")
+
+def get_server_port(server_id):
+  if (server_id == 1):
+    return 50051
+  elif (server_id == 2):
+    return 50052
+  elif (server_id == 3):
+    return 50053
+
+def request_pending_messages(port):
+  try:
+    with grpc.insecure_channel('localhost:' + port) as channel:
+      stub = document_pb2_grpc.DocumentServiceStub(channel)
+      response = stub.SendPendingMessages(document_pb2.Request(message="I'm up and running"))
+      print('DESPUES DE ARMAR LA RESPONSE\n')
+      # paso la lista al document para que reemplace su lista desactualizada
+      #self._document.set_operations(request.params)
+
+      print("Pending params: " + response.message)
+  except:
+    print("server doesn't response")
 
 
 def send_to_other_server(command, index, char, port, timestamp, replica_id, server_id):
@@ -105,6 +174,7 @@ def send_to_other_server(command, index, char, port, timestamp, replica_id, serv
 
       print("Document client received: " + response.message)
   except:
+    # esto va a funcionar siempre que el server no se caiga
     print("server doesn't works")
 
 def send_to_other_servers(command, index, char, timestamp, replica_id, server_id):

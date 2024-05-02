@@ -12,6 +12,10 @@ service DocumentService {
   rpc SendInsert (InsertParams) returns (Response) {}
 
   rpc SendDelete (DeleteParams) returns (Response) {}
+
+  //
+
+  rpc SendPendingMessages (Request) returns (ParamsList) {}
 }
 
 // client messages
@@ -51,4 +55,25 @@ message DeleteParams {
   bool tumbstamp = 3;
   repeated int32 timestamp = 4;
   string replica_id = 5;
+}
+
+//
+
+message Request {
+  string message = 1;
+  //int32 server_port = 2;
+}
+
+message Params {
+  int32 index = 1;
+  string char = 2;
+  int32 server_id = 3;
+  bool tumbstamp = 4;
+  repeated int32 timestamp = 5;
+  string replica_id = 6;
+}
+
+message ParamsList {
+  //repeated Params params = 1;
+  string message = 2;
 }
