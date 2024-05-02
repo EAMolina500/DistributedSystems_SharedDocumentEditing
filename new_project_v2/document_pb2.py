@@ -13,7 +13,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0e\x64ocument.proto\"\x14\n\x04\x43har\x12\x0c\n\x04\x63har\x18\x01 \x01(\t\"\x1b\n\x08Response\x12\x0f\n\x07message\x18\x01 \x01(\t\"%\n\x06Insert\x12\r\n\x05index\x18\x01 \x01(\x05\x12\x0c\n\x04\x63har\x18\x02 \x01(\t\"x\n\x0cInsertParams\x12\r\n\x05index\x18\x01 \x01(\x05\x12\x0c\n\x04\x63har\x18\x02 \x01(\t\x12\x11\n\tserver_id\x18\x03 \x01(\x05\x12\x11\n\ttumbstamp\x18\x04 \x01(\x08\x12\x11\n\ttimestamp\x18\x05 \x03(\x05\x12\x12\n\nreplica_id\x18\x06 \x01(\t\"\x17\n\x06\x44\x65lete\x12\r\n\x05index\x18\x01 \x01(\x05\"j\n\x0c\x44\x65leteParams\x12\r\n\x05index\x18\x01 \x01(\x05\x12\x11\n\tserver_id\x18\x02 \x01(\x05\x12\x11\n\ttumbstamp\x18\x03 \x01(\x08\x12\x11\n\ttimestamp\x18\x04 \x03(\x05\x12\x12\n\nreplica_id\x18\x05 \x01(\t\"\x1a\n\x07Request\x12\x0f\n\x07message\x18\x01 \x01(\t\"r\n\x06Params\x12\r\n\x05index\x18\x01 \x01(\x05\x12\x0c\n\x04\x63har\x18\x02 \x01(\t\x12\x11\n\tserver_id\x18\x03 \x01(\x05\x12\x11\n\ttumbstamp\x18\x04 \x01(\x08\x12\x11\n\ttimestamp\x18\x05 \x03(\x05\x12\x12\n\nreplica_id\x18\x06 \x01(\t\"\x1d\n\nParamsList\x12\x0f\n\x07message\x18\x02 \x01(\t2\xe3\x01\n\x0f\x44ocumentService\x12%\n\rInsertCommand\x12\x07.Insert\x1a\t.Response\"\x00\x12%\n\rDeleteCommand\x12\x07.Delete\x1a\t.Response\"\x00\x12(\n\nSendInsert\x12\r.InsertParams\x1a\t.Response\"\x00\x12(\n\nSendDelete\x12\r.DeleteParams\x1a\t.Response\"\x00\x12.\n\x13SendPendingMessages\x12\x08.Request\x1a\x0b.ParamsList\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0e\x64ocument.proto\"\x14\n\x04\x43har\x12\x0c\n\x04\x63har\x18\x01 \x01(\t\"\x1b\n\x08Response\x12\x0f\n\x07message\x18\x01 \x01(\t\"%\n\x06Insert\x12\r\n\x05index\x18\x01 \x01(\x05\x12\x0c\n\x04\x63har\x18\x02 \x01(\t\"x\n\x0cInsertParams\x12\r\n\x05index\x18\x01 \x01(\x05\x12\x0c\n\x04\x63har\x18\x02 \x01(\t\x12\x11\n\tserver_id\x18\x03 \x01(\x05\x12\x11\n\ttumbstamp\x18\x04 \x01(\x08\x12\x11\n\ttimestamp\x18\x05 \x03(\x05\x12\x12\n\nreplica_id\x18\x06 \x01(\t\"\x17\n\x06\x44\x65lete\x12\r\n\x05index\x18\x01 \x01(\x05\"j\n\x0c\x44\x65leteParams\x12\r\n\x05index\x18\x01 \x01(\x05\x12\x11\n\tserver_id\x18\x02 \x01(\x05\x12\x11\n\ttumbstamp\x18\x03 \x01(\x08\x12\x11\n\ttimestamp\x18\x04 \x03(\x05\x12\x12\n\nreplica_id\x18\x05 \x01(\t\"/\n\x07Request\x12\x0f\n\x07message\x18\x01 \x01(\t\x12\x13\n\x0bserver_port\x18\x02 \x01(\t\"\x85\x01\n\x06Params\x12\x11\n\toperation\x18\x01 \x01(\t\x12\r\n\x05index\x18\x02 \x01(\x05\x12\x0c\n\x04\x63har\x18\x03 \x01(\t\x12\x11\n\tserver_id\x18\x04 \x01(\x05\x12\x11\n\ttumbstamp\x18\x05 \x01(\x08\x12\x11\n\ttimestamp\x18\x06 \x03(\x05\x12\x12\n\nreplica_id\x18\x07 \x01(\t\"%\n\nParamsList\x12\x17\n\x06params\x18\x01 \x03(\x0b\x32\x07.Params2\xe3\x01\n\x0f\x44ocumentService\x12%\n\rInsertCommand\x12\x07.Insert\x1a\t.Response\"\x00\x12%\n\rDeleteCommand\x12\x07.Delete\x1a\t.Response\"\x00\x12(\n\nSendInsert\x12\r.InsertParams\x1a\t.Response\"\x00\x12(\n\nSendDelete\x12\r.DeleteParams\x1a\t.Response\"\x00\x12.\n\x13SendPendingMessages\x12\x08.Request\x1a\x0b.ParamsList\"\x00\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -33,11 +33,11 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _globals['_DELETEPARAMS']._serialized_start=255
   _globals['_DELETEPARAMS']._serialized_end=361
   _globals['_REQUEST']._serialized_start=363
-  _globals['_REQUEST']._serialized_end=389
-  _globals['_PARAMS']._serialized_start=391
-  _globals['_PARAMS']._serialized_end=505
-  _globals['_PARAMSLIST']._serialized_start=507
-  _globals['_PARAMSLIST']._serialized_end=536
-  _globals['_DOCUMENTSERVICE']._serialized_start=539
-  _globals['_DOCUMENTSERVICE']._serialized_end=766
+  _globals['_REQUEST']._serialized_end=410
+  _globals['_PARAMS']._serialized_start=413
+  _globals['_PARAMS']._serialized_end=546
+  _globals['_PARAMSLIST']._serialized_start=548
+  _globals['_PARAMSLIST']._serialized_end=585
+  _globals['_DOCUMENTSERVICE']._serialized_start=588
+  _globals['_DOCUMENTSERVICE']._serialized_end=815
 # @@protoc_insertion_point(module_scope)

@@ -61,19 +61,20 @@ message DeleteParams {
 
 message Request {
   string message = 1;
-  //int32 server_port = 2;
+  string server_port = 2;
 }
 
 message Params {
-  int32 index = 1;
-  string char = 2;
-  int32 server_id = 3;
-  bool tumbstamp = 4;
-  repeated int32 timestamp = 5;
-  string replica_id = 6;
+  string operation = 1;
+  int32 index = 2;
+  string char = 3;
+  int32 server_id = 4;
+  bool tumbstamp = 5;
+  repeated int32 timestamp = 6;
+  string replica_id = 7;
 }
 
 message ParamsList {
-  //repeated Params params = 1;
-  string message = 2;
+  repeated Params params = 1;
+  //string message = 2;
 }

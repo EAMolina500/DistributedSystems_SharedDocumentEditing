@@ -23,6 +23,8 @@ class Document:
 
   def set_operations(self, operations):
     self._operations = operations
+    self.apply_operations()
+    print(self._content)
 
   def get_last_clock(self):
     greater_clock = [0,0,0]

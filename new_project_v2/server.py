@@ -6,6 +6,7 @@ import document_pb2_grpc
 
 from document import Document
 from vector_clock import VectorClock
+from operation import Operation
 
 import sys
 
@@ -23,12 +24,12 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
       self._vector_clock = VectorClock(server_id)
 
     if (self._server_id == 1):
-      request_pending_messages('50052')
+      request_pending_messages(self._document, '50052')
     elif (self._server_id == 2):
-      request_pending_messages('50051')
+      request_pending_messages(self._document, '50051')
       #request_pending_messages('50053')
     elif (self._server_id == 3):
-      request_pending_messages('50051')
+      request_pending_messages(self._document, '50051')
 
   def gen_replica_id(self):
     self._ops_number += 1
@@ -106,38 +107,26 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     self._document.display()
     return document_pb2.Response(message='The delete command sent by server was applied')
 
-  # ...
   def SendPendingMessages(self, request, context):
-    """
-    port = request.port
-    params = document_pb2.Params(
-      index=1,
-      char='X',
-      server_id=self._server_id,
-      tumbstamp=False,
-      timestamp=[0,0,0],
-      replica_id='1A'
-    )
-    params_list = [params]
-    print('PARAMS DONE!\n')
+    params = []
+    ops = self._document.get_operations()
 
-    if (self._pending_msgs[port]):
-      print('ENTRE AL IF\n')
-      for op in self._document.get_operations():
-        params = document_pb2.Params(
-          index=op.get_index(),
-          char=op.get_char(),
-          server_id=self._server_id,
-          tumbstamp=op.get_deleted(),
-          timestamp=op.get_clock(),
-          replica_id=op.get_replica_id()
-        )
-        params_list.append(params)
-    print('TERMINE EL CICLO\n')
-    """
-    print('Request - server post:\n')
-    #print(request.server_port)
-    return document_pb2.ParamsList(message="Take missing operations")
+    if len(ops) > 0:
+      for op in ops:
+        params.append(op_to_params(op, self._server_id))
+
+    return document_pb2.ParamsList(params=[])
+
+def op_to_params(op, server_id):
+  return document_pb2.Params(
+    operation=op.get_name(),
+    index=op.get_index(),
+    char=op.get_char(),
+    server_id=server_id,
+    tumbstamp =op.get_deleted(),
+    timestamp =op.get_clock(),
+    replica_id =op.get_replica_id()
+  )
 
 def get_server_port(server_id):
   if (server_id == 1):
@@ -147,16 +136,22 @@ def get_server_port(server_id):
   elif (server_id == 3):
     return 50053
 
-def request_pending_messages(port):
+def request_pending_messages(document, port):
   try:
     with grpc.insecure_channel('localhost:' + port) as channel:
       stub = document_pb2_grpc.DocumentServiceStub(channel)
-      response = stub.SendPendingMessages(document_pb2.Request(message="I'm up and running"))
+      response = stub.SendPendingMessages(document_pb2.Request(message="I'm up and running", server_port=port))
       print('DESPUES DE ARMAR LA RESPONSE\n')
       # paso la lista al document para que reemplace su lista desactualizada
       #self._document.set_operations(request.params)
 
-      print("Pending params: " + response.message)
+      ops = []
+      for params in response.params:
+        op = Operation(params.operation, params.index, params.char, params.timestamp, params.replica_id)
+        ops.append(op)
+
+      document.set_operations(ops)
+      print("Pending params: " + "WAAA")
   except:
     print("server doesn't response")
 

@@ -38,6 +38,9 @@ class Operation:
   def get_applied(self):
     return self._applied
 
+  def get_deleted(self):
+    return self._deleted
+
   def set_name(self, name):
     self._name = name
 
