@@ -15,8 +15,6 @@ class Document:
       self._operations = self._file.get_content()
       self._operations = compare_and_order_operations([], self._operations)
       self.apply_operations()
-      print('operations')
-      print(self._operations)
 
   def get_operations(self):
     return self._operations
@@ -38,15 +36,11 @@ class Document:
     return VectorClock(self._server_id, greater_clock)
 
   def insert(self, index, char, vector_clock, replica_id):
-    # podria guardar esto en otro archivo
-    #self._last_clock = vector_clock
     incoming_op = Operation('insert', int(index), char, vector_clock, replica_id)
     self._operations = insert_operation(self._operations, incoming_op)
     self._file.insert_operation(incoming_op)
 
   def delete(self, index, vector_clock, replica_id):
-    # podria guardar esto en otro archivo
-    #self._last_clock = vector_clock
     incoming_op = Operation('delete', int(index), None, vector_clock, replica_id)
     self._operations = insert_operation(self._operations, incoming_op)
     self._file.insert_operation(incoming_op)

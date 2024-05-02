@@ -16,16 +16,11 @@ class File:
     try:
       with open(self._name, 'r') as file:
         for line in file:
-          print('line')
-          print(line)
           parsed_line = self.parse_line(line)
           if parsed_line:
             self._content.append(parsed_line)
         file.close()
-        print('get content from file')
-        print(self._content)
     except FileExistsError:
-      print(self._name)
       print("File doesn't exist")
 
   def get_content(self):
@@ -56,9 +51,6 @@ class File:
     # Assuming your operations are represented as strings with a specific format:
     # "OperationName index character {vector_clock_elements separated by commas} replica_id"
     line_parts = line.strip().split('/')  # Split the line based on spaces
-
-    print('line parts')
-    print(line_parts)
     operation_obj = None
 
     if len(line_parts) >= 6:
