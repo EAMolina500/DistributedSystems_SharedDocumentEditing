@@ -77,58 +77,32 @@ def compare(clock1, clock2):
     return 'conflict'
 
 def insert_operation(ordered_operations, new_operation):
-  """
-  Inserts a new operation into an already ordered list based on vector clocks and replica IDs.
-
-  Args:
-    ordered_operations (list[Operation]): Ordered list of operations.
-    new_operation (Operation): The operation to insert.
-
-  Returns:
-    list[Operation]: The updated ordered list with the new operation inserted.
-  """
   if ordered_operations is None:
-    # Handle the case where the initial list is empty
     return [new_operation]
 
   insertion_index = 0
   for existing_op in ordered_operations:
     comparison = compare(new_operation.get_clock(), existing_op.get_clock())
     if comparison == 'equal':
-      # If clocks are equal, insert before the existing operation (stability)
       insertion_index = ordered_operations.index(existing_op)
       break
-    elif comparison == 'clock1':  # new_operation's clock is greater
+    elif comparison == 'clock1':
       insertion_index = ordered_operations.index(existing_op) + 1
       break
-    elif comparison == 'clock2':  # existing operation's clock is greater
+    elif comparison == 'clock2':
       continue
-    else:  # Conflict: compare by replica ID
+    else:
       if new_operation.get_replica_id() < existing_op.get_replica_id():
         insertion_index = ordered_operations.index(existing_op)
         break
       else:
         continue
 
-  # Insert the new operation at the determined index
   ordered_operations.insert(insertion_index, new_operation)
 
   return ordered_operations
 
 def compare_and_order_operations(document_operations, incoming_operations):
-  """
-  Compares and orders a list of document operations with a list of incoming operations based
-  on vector clocks and replica IDs. Handles conflicts gracefully.
-
-  Args:
-      document_operations (list[Operation]): List of operations in the document.
-      incoming_operations (list[Operation]): List of incoming operations to compare.
-
-  Returns:
-      list[Operation]: Ordered list of operations, combining both document and incoming
-                        operations while resolving conflicts.
-  """
-
   ordered_operations = []
   document_op_index = 0
   incoming_op_index = 0
@@ -139,16 +113,15 @@ def compare_and_order_operations(document_operations, incoming_operations):
 
     comparison = compare(document_op.get_clock(), incoming_op.get_clock())
     if comparison == 'equal':
-      # If vector clocks are equal, prioritize document operations (stability)
       ordered_operations.append(document_op)
       document_op_index += 1
-    elif comparison == 'clock1': #(document_op's clock is greater):
+    elif comparison == 'clock1':
       ordered_operations.append(document_op)
       document_op_index += 1
-    elif comparison == 'clock2': #(incoming_op's clock is greater):
+    elif comparison == 'clock2':
       ordered_operations.append(incoming_op)
       incoming_op_index += 1
-    else:  # Conflict: compare by replica ID
+    else:
       if document_op.get_replica_id() < incoming_op.get_replica_id():
         ordered_operations.append(document_op)
         document_op_index += 1
@@ -156,7 +129,6 @@ def compare_and_order_operations(document_operations, incoming_operations):
         ordered_operations.append(incoming_op)
         incoming_op_index += 1
 
-  # Append remaining operations after one list is exhausted
   ordered_operations.extend(document_operations[document_op_index:])
   ordered_operations.extend(incoming_operations[incoming_op_index:])
 
