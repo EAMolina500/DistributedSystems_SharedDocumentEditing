@@ -24,6 +24,7 @@ class File:
       print("File doesn't exist")
 
   def get_content(self):
+    self.get_content_from_file()
     return self._content
 
   def is_empty(self):
@@ -41,13 +42,14 @@ class File:
 
     if len(line_parts) >= 6:
       #raise ValueError(f"Invalid operation line: {line}")
-      operation_name = line_parts[0]
+      name = line_parts[0]
       index = int(line_parts[1])
       char = line_parts[2]
       vector_clock = [int(val) for val in line_parts[3].strip('[]').split(',')]
       replica_id = line_parts[4]
-      applied = False
+      applied = line_parts[5]
+      deleted = line_parts[6]
 
-      operation_obj = Operation(operation_name, index, char, vector_clock, replica_id)
+      operation_obj = Operation(name, index, char, vector_clock, replica_id)
 
     return operation_obj

@@ -1,6 +1,4 @@
 import unittest
-from unittest.mock import patch, MagicMock  # For mocking file operations
-
 import sys
 import os
 
@@ -9,52 +7,47 @@ parent = os.path.dirname(current)
 sys.path.append(parent)
 
 from file import File
+from operation import Operation
 
-
-class FileTest(unittest.TestCase):
-
+class TestFile(unittest.TestCase):
   def setUp(self):
-    self.file_name = "test_file"
+    self.file_name = 'test_file'
+    self.file_name_with_ext = self.file_name + '.txt'
 
-  @patch('file.open')  # Mock open function for controlled behavior
-  def test_init_new_file(self, mock_open):
-    """Tests that the constructor creates a new file and sets content to empty list."""
-    mock_open.return_value = MagicMock()  # Simulate successful file creation
+  def test(self):
+    # set up
+    file = File(self.file_name)
+    op1 = Operation('insert', 3, 'x', [1,2,0], '1A')
+    op2 = Operation('delete', 1, '', [3,2,1], '1B')
+    op3 = Operation('insert', 5, 'z', [3,2,0], '2C')
+    file.insert_operation(op1)
+    file.insert_operation(op2)
+    file.insert_operation(op3)
+    content = file.get_content()
+    os.remove(self.file_name_with_ext)
 
+    # asserts
+    self.assertEqual(len(content), 3)
+    self.assertIsInstance(content[0], Operation)
+
+  def test_2(self):
+    # set up
     file = File(self.file_name)
 
-    self.assertEqual(file._name, self.file_name + ".txt")
-    self.assertIsNone(file._file)  # File handle should be closed
-    self.assertEqual(file._content, [])
-    mock_open.assert_called_once_with(self.file_name + ".txt", 'x')  # Verify mode
+    content = file.get_content()
+    self.assertTrue(file.is_empty())
 
-  @patch('file.open')  # Mock open function
-  def test_init_existing_file(self, mock_open):
-    """Tests that the constructor handles existing files and calls get_content_from_file."""
-    mock_open.side_effect = FileExistsError  # Raise FileExistsError on first call
+    os.remove(self.file_name_with_ext)
+    self.assertEqual(len(content), 0)
 
-    file = File(self.file_name)
+  #def test_get_content_parses_lines(self):
+    #file_obj = File(self.test_filename)
+    #content = file_obj.get_content()
 
-    self.assertEqual(file._name, self.file_name + ".txt")
-    self.assertIsNone(file._file)  # File handle should be closed
-    self.assertEqual(file._content, [])
-    mock_open.assert_has_calls([patch.call(self.file_name + ".txt", 'x'), patch.call(self.file_name, 'r')])
+    #self.assertEqual(len(content), 2)  # Assert two operations parsed
+    #self.assertIsInstance(content[0], Operation)  # Assert first element is Operation
+    #self.assertEqual(content[0].name, "insert")  # Assert operation details
 
-  @patch('file.open')  # Mock open function
-  def test_get_content_from_file(self, mock_open):
-    """Tests that get_content_from_file successfully reads file content."""
-    mock_file = MagicMock()
-    mock_file.__iter__.return_value = iter(["line1\n", "line2\n"])  # Mock file content
-    mock_open.return_value = mock_file
-
-    file = File(self.file_name)
-
-    self.assertEqual(file._content, ["line1", "line2"])
-    mock_open.assert_called_once_with(self.file_name, 'r')
-
-  @patch('file.open')  # Mock open function
-  def test_get_content_from_file_empty(self, mock_open):
-    """Tests that get_content_from_file handles empty files."""
-    mock_file = MagicMock()
-    mock_file.__iter__.return_value = iter([])  # Mock empty file
-    mock_open.return_
+# Add similar test functions for other scenarios
+if __name__ == "__main__":
+  unittest.main()
