@@ -76,6 +76,7 @@ def compare(clock1, clock2):
   else:
     return 'conflict'
 
+"""
 def insert_operation(ordered_operations, new_operation):
   if ordered_operations is None:
     return [new_operation]
@@ -101,7 +102,51 @@ def insert_operation(ordered_operations, new_operation):
   ordered_operations.insert(insertion_index, new_operation)
 
   return ordered_operations
+"""
 
+def insert_operation(ordered_operations, new_operation):
+  if new_operation is None and ordered_operations is None:
+    print("ERROR EN LA FUNCION INSERT OPERATION\n")
+    return None
+
+  if new_operation is None:
+    return ordered_operations
+
+  if ordered_operations is None:
+    return [new_operation]
+
+  # arriba los casos "negativos"
+
+  insertion_index = 0
+  for existing_op in ordered_operations:
+    comparison = compare(new_operation.get_clock(), existing_op.get_clock())
+    if comparison == 'clock1': # new_operation is greater
+      #insertion_index = ordered_operations.index(existing_op) + 1
+      continue
+    elif comparison == 'clock2': # new_operation is smaller
+      # inserto en el indice de la operacion actual
+      ordered_operations.index(existing_op)
+    else:
+      if new_operation.get_replica_id() <= existing_op.get_replica_id():
+        # inserto antes ?
+        insertion_index = ordered_operations.index(existing_op)
+        break
+      else:
+        continue
+
+  ordered_operations.insert(insertion_index, new_operation)
+
+  return ordered_operations
+
+def compare_and_order_operations(document_operations, incoming_operations):
+  ordered_operations = []
+
+  for op in incoming_operations:
+    ordered_operations = insert_operation(document_operations, op)
+
+  return ordered_operations
+
+"""
 def compare_and_order_operations(document_operations, incoming_operations):
   ordered_operations = []
   document_op_index = 0
@@ -133,3 +178,4 @@ def compare_and_order_operations(document_operations, incoming_operations):
   ordered_operations.extend(incoming_operations[incoming_op_index:])
 
   return ordered_operations
+"""

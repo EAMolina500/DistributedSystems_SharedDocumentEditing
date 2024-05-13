@@ -51,13 +51,37 @@ class FunctionTest(unittest.TestCase):
     new_operation = Operation('insert', 0, 'b', [1, 0, 1], '1B')
     expected = [new_operation, operations[0]]
     self.assertEqual(insert_operation(operations, new_operation), expected)
-  """
-  def test_insert_operation_after(self):
-    operations = [Operation('insert', 0, 'c', [1, 0, 0], '1B')]
-    new_operation = Operation('insert', 2, 'c', [1, 0, 0], '3C')
-    expected = [operations[0], new_operation]
-    self.assertEqual(insert_operation(operations, new_operation), expected)
 
+  def test_insert_operation_after(self):
+    op1 = Operation('insert', 1, 'a', [0, 1, 1], '1A')
+    op2 = Operation('insert', 2, 'b', [1, 1, 1], '1B')
+    op3 = Operation('insert', 3, 'c', [1, 1, 2], '1C')
+    op4 = Operation('delete', 2, '', [1, 2, 3], '1B')
+    op5 = Operation('insert', 4, 'd', [2, 2, 3], '1A')
+    op6 = Operation('insert', 5, 'e', [3, 2, 2], '1C')
+    op7 = Operation('delete', 3, '', [4, 3, 4], '1A')
+    op8 = Operation('insert', 6, 'f', [5, 4, 4], '1C')
+    op9 = Operation('insert', 7, 'g', [6, 4, 5], '1B')
+
+    ops = []
+    ops = insert_operation(ops, op1)
+    ops = insert_operation(ops, op3)
+    ops = insert_operation(ops, op5)
+    ops = insert_operation(ops, op7)
+    ops = insert_operation(ops, op9)
+    ops = insert_operation(ops, op2)
+    ops = insert_operation(ops, op4)
+    ops = insert_operation(ops, op6)
+    ops = insert_operation(ops, op8)
+
+    expected = [op1, op2, op3, op4, op5, op6, op7, op8, op9]
+
+    print(ops)
+    print(ops)
+
+    self.assertEqual(ops, expected)
+
+  """
   def test_insert_operation_conflict_replica_id_1(self):
     operations = [Operation('insert', 0, 'd', [3, 1, 0], '1A')]
     new_operation = Operation('insert', 0, 'e', [2, 1, 0], '2B')
