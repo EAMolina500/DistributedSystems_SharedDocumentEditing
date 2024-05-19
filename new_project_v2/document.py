@@ -55,10 +55,13 @@ class Document:
       if not op.get_applied():
         if op.get_name() == 'insert':
           self._content.insert(op.get_index(), op.get_char())
-          op.set_applied(True)
         elif op.get_name() == 'delete':
-          del(self._content[op.get_index()])
-          op.set_applied(True)
+          print('INDEXXX:')
+          print(op.get_index())
+          print('LONG DEL ARREGLO:')
+          print(len(self._content))
+          if op.get_index() < len(self._content):
+            del(self._content[op.get_index()])
 
       op.set_applied(True)
 
@@ -105,12 +108,14 @@ def insert_operation(ordered_operations, new_operation):
 """
 
 def insert_operation(ordered_operations, new_operation):
+  """
   if new_operation is None and ordered_operations is None:
     print("ERROR EN LA FUNCION INSERT OPERATION\n")
     return None
 
   if new_operation is None:
     return ordered_operations
+  """
 
   if ordered_operations is None:
     return [new_operation]
@@ -120,12 +125,11 @@ def insert_operation(ordered_operations, new_operation):
   insertion_index = 0
   for existing_op in ordered_operations:
     comparison = compare(new_operation.get_clock(), existing_op.get_clock())
-    if comparison == 'clock1': # new_operation is greater
-      #insertion_index = ordered_operations.index(existing_op) + 1
+    if comparison == 'clock2': # new_operation smaller
+      insertion_index = ordered_operations.index(existing_op)
+      break
+    elif comparison == 'clock1': # new_operation greater
       continue
-    elif comparison == 'clock2': # new_operation is smaller
-      # inserto en el indice de la operacion actual
-      ordered_operations.index(existing_op)
     else:
       if new_operation.get_replica_id() <= existing_op.get_replica_id():
         # inserto antes ?
@@ -138,11 +142,9 @@ def insert_operation(ordered_operations, new_operation):
 
   return ordered_operations
 
-def compare_and_order_operations(document_operations, incoming_operations):
-  ordered_operations = []
-
-  for op in incoming_operations:
-    ordered_operations = insert_operation(document_operations, op)
+def compare_and_order_operations(ordered_operations, new_operations):
+  for operation in new_operations:
+    new_ordered_operations = insert_operation(ordered_operations, operation)
 
   return ordered_operations
 

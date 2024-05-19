@@ -95,7 +95,7 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     print('El server envio: %s' % request)
 
     self._vector_clock.increment()
-    sent_vector_clock = VectorClock(list(request.timestamp))
+    sent_vector_clock = VectorClock(self._server_id, list(request.timestamp))
     self._vector_clock.compute_new(sent_vector_clock)
 
     self._document.delete(request.index, sent_vector_clock.get_clock(), request.replica_id)
@@ -143,6 +143,10 @@ def request_pending_messages(document, port):
         op = Operation(params.operation, params.index, params.char, params.timestamp, params.replica_id)
         ops.append(op)
 
+      print('ops:')
+      print(ops)
+
+      ops.reverse()
       document.set_operations(ops)
   except:
     print("server doesn't response")
