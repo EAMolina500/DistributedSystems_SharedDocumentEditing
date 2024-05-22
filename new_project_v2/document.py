@@ -56,10 +56,6 @@ class Document:
         if op.get_name() == 'insert':
           self._content.insert(op.get_index(), op.get_char())
         elif op.get_name() == 'delete':
-          print('INDEXXX:')
-          print(op.get_index())
-          print('LONG DEL ARREGLO:')
-          print(len(self._content))
           if op.get_index() < len(self._content):
             del(self._content[op.get_index()])
 
@@ -78,34 +74,6 @@ def compare(clock1, clock2):
     return 'clock2'
   else:
     return 'conflict'
-
-"""
-def insert_operation(ordered_operations, new_operation):
-  if ordered_operations is None:
-    return [new_operation]
-
-  insertion_index = 0
-  for existing_op in ordered_operations:
-    comparison = compare(new_operation.get_clock(), existing_op.get_clock())
-    if comparison == 'equal':
-      insertion_index = ordered_operations.index(existing_op)
-      break
-    elif comparison == 'clock1':
-      insertion_index = ordered_operations.index(existing_op) + 1
-      break
-    elif comparison == 'clock2':
-      continue
-    else:
-      if new_operation.get_replica_id() < existing_op.get_replica_id():
-        insertion_index = ordered_operations.index(existing_op)
-        break
-      else:
-        continue
-
-  ordered_operations.insert(insertion_index, new_operation)
-
-  return ordered_operations
-"""
 
 def insert_operation(ordered_operations, new_operation):
   """
@@ -147,37 +115,3 @@ def compare_and_order_operations(ordered_operations, new_operations):
     new_ordered_operations = insert_operation(ordered_operations, operation)
 
   return ordered_operations
-
-"""
-def compare_and_order_operations(document_operations, incoming_operations):
-  ordered_operations = []
-  document_op_index = 0
-  incoming_op_index = 0
-
-  while document_op_index < len(document_operations) and incoming_op_index < len(incoming_operations):
-    document_op = document_operations[document_op_index]
-    incoming_op = incoming_operations[incoming_op_index]
-
-    comparison = compare(document_op.get_clock(), incoming_op.get_clock())
-    if comparison == 'equal':
-      ordered_operations.append(document_op)
-      document_op_index += 1
-    elif comparison == 'clock1':
-      ordered_operations.append(document_op)
-      document_op_index += 1
-    elif comparison == 'clock2':
-      ordered_operations.append(incoming_op)
-      incoming_op_index += 1
-    else:
-      if document_op.get_replica_id() < incoming_op.get_replica_id():
-        ordered_operations.append(document_op)
-        document_op_index += 1
-      else:
-        ordered_operations.append(incoming_op)
-        incoming_op_index += 1
-
-  ordered_operations.extend(document_operations[document_op_index:])
-  ordered_operations.extend(incoming_operations[incoming_op_index:])
-
-  return ordered_operations
-"""

@@ -24,12 +24,17 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
       self._vector_clock = VectorClock(server_id)
 
     if (self._server_id == 1):
-      request_pending_messages(self._document, '50052')
+      got_it = request_pending_messages(self._document, '50052')
+      if not got_it:
+        request_pending_messages(self._document, '50053')
     elif (self._server_id == 2):
-      request_pending_messages(self._document, '50051')
-      #request_pending_messages('50053')
+      got_it = request_pending_messages(self._document, '50051')
+      if not got_it:
+        request_pending_messages(self._document, '50053')
     elif (self._server_id == 3):
-      request_pending_messages(self._document, '50051')
+      got_it = request_pending_messages(self._document, '50051')
+      if not got_it:
+        request_pending_messages(self._document, '50052')
 
   def gen_replica_id(self):
     self._ops_number += 1
@@ -148,8 +153,12 @@ def request_pending_messages(document, port):
 
       ops.reverse()
       document.set_operations(ops)
+
+      return True
   except:
     print("server doesn't response")
+
+    return False
 
 
 def send_to_other_server(command, index, char, port, timestamp, replica_id, server_id):
