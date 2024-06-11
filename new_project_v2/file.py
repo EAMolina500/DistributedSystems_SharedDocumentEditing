@@ -30,6 +30,13 @@ class File:
   def is_empty(self):
     return self._content == []
 
+  def set_file(self, operations):
+    with open(self._name, 'w') as file:
+      for operation in operations:
+        if operation:
+          file.write(f"{repr(operation)}\n")
+      file.close()
+
   def insert_operation(self, operation):
     with open(self._name, 'a') as file:
       if operation:

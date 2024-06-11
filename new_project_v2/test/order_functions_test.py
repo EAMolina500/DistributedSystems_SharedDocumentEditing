@@ -49,7 +49,7 @@ class FunctionTest(unittest.TestCase):
   def test_insert_before_by_replica_id(self):
     operations = [Operation('insert', 0, 'a', [2, 1, 0], '1A')]
     new_operation = Operation('insert', 0, 'b', [1, 0, 1], '1B')
-    expected = [new_operation, operations[0]]
+    expected = [operations[0], new_operation]
     self.assertEqual(insert_operation(operations, new_operation), expected)
 
   def test_insert_operation_after(self):
@@ -74,10 +74,10 @@ class FunctionTest(unittest.TestCase):
     ops = insert_operation(ops, op6)
     ops = insert_operation(ops, op8)
 
-    expected = [op1, op2, op3, op4, op5, op6, op7, op8, op9]
+    print('ops:')
+    print(ops)
 
-    print(ops)
-    print(ops)
+    expected = [op1, op2, op3, op4, op5, op6, op7, op8, op9]
 
     self.assertEqual(ops, expected)
 

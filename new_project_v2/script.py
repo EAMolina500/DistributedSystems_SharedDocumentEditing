@@ -24,6 +24,6 @@ if __name__ == "__main__":
   client.run_for_test(server1, ins, 8, 'i', port1)
   client.run_for_test(server3, ins, 9, 'j', port3)
 
-  client.run_for_test(server1, rem, 2, '', port1)
-  client.run_for_test(server2, rem, 4, '', port2)
-  client.run_for_test(server3, rem, 6, '', port3)
+  client.run_for_test(server1, rem, 4, '', port1)
+  client.run_for_test(server2, rem, 1, '', port2)
+  client.run_for_test(server3, rem, 2, '', port3)

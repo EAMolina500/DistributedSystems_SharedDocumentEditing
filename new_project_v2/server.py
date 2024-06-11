@@ -52,7 +52,13 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
   def InsertCommand(self, request, context):
     print('El client envio: %s' % request)
 
+    print('Insert command - SEND:\n')
+    print('Vector before increment:\n')
+    print(self._vector_clock)
+
     self._vector_clock.increment()
+    print('Vector after increment:\n')
+    print(self._vector_clock)
     replica_id = self.gen_replica_id()
 
     self._document.insert(request.index, request.char, self._vector_clock.get_clock(), replica_id)
@@ -69,7 +75,13 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
   def DeleteCommand(self, request, context):
     print('El client envio: %s' % request)
 
+    print('Delete command - SEND:\n')
+    print('Vector before increment:\n')
+    print(self._vector_clock)
+
     self._vector_clock.increment()
+    print('Vector after increment:\n')
+    print(self._vector_clock)
     replica_id = self.gen_replica_id()
 
     self._document.delete(request.index, self._vector_clock.get_clock(), replica_id)
@@ -87,9 +99,23 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
   def SendInsert(self, request, context):
     print('El server envio: %s' % request)
 
+    print('Insert command - GET:\n')
+    print('Vector before increment:\n')
+    print(self._vector_clock)
+
     self._vector_clock.increment()
+
+    print('Vector after increment:\n')
+    print(self._vector_clock)
+
     sent_vector_clock = VectorClock(self._server_id, list(request.timestamp))
     self._vector_clock.compute_new(sent_vector_clock)
+
+    print('New vector:\n')
+    print(self._vector_clock)
+
+    print('Sent vector clock:\n')
+    print(sent_vector_clock)
 
     self._document.insert(request.index, request.char, sent_vector_clock.get_clock(), request.replica_id)
     self._document.apply_operations()
@@ -99,9 +125,23 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
   def SendDelete(self, request, context):
     print('El server envio: %s' % request)
 
+    print('Delete command - GET:\n')
+    print('Vector before increment:\n')
+    print(self._vector_clock)
+
     self._vector_clock.increment()
+
+    print('Vector after increment:\n')
+    print(self._vector_clock)
+
     sent_vector_clock = VectorClock(self._server_id, list(request.timestamp))
     self._vector_clock.compute_new(sent_vector_clock)
+
+    print('New vector:\n')
+    print(self._vector_clock)
+
+    print('Sent vector clock:\n')
+    print(sent_vector_clock)
 
     self._document.delete(request.index, sent_vector_clock.get_clock(), request.replica_id)
     self._document.apply_operations()
@@ -151,7 +191,7 @@ def request_pending_messages(document, port):
       print('ops:')
       print(ops)
 
-      ops.reverse()
+      #ops.reverse()
       document.set_operations(ops)
 
       return True

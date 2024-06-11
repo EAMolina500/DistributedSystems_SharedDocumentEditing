@@ -13,7 +13,7 @@ class Document:
 
     if not self._file.is_empty():
       self._operations = self._file.get_content()
-      self._operations = compare_and_order_operations([], self._operations)
+      #self._operations = compare_and_order_operations([], self._operations)
       self.apply_operations()
 
   def get_operations(self):
@@ -37,13 +37,41 @@ class Document:
 
   def insert(self, index, char, vector_clock, replica_id):
     incoming_op = Operation('insert', int(index), char, vector_clock, replica_id)
-    self._operations = insert_operation(self._operations, incoming_op)
-    self._file.insert_operation(incoming_op)
+    list_lenght = len(self._operations)
+    if (list_lenght > 0):
+      last_op = self._operations[list_lenght-1]
+      if (last_op.get_index() == incoming_op.get_index()):
+        if (last_op.get_clock() <= incoming_op.get_clock()):
+          self._operations.append(incoming_op)
+        else:
+          self._operations[list_lenght-1] = incoming_op
+          self._operations.append(last_op)
+      else:
+        self._operations.append(incoming_op)
+    else:
+      self._operations.append(incoming_op)
+
+    self._file.set_file(self._operations)
+    #self._file.insert_operation(incoming_op)
 
   def delete(self, index, vector_clock, replica_id):
     incoming_op = Operation('delete', int(index), None, vector_clock, replica_id)
-    self._operations = insert_operation(self._operations, incoming_op)
-    self._file.insert_operation(incoming_op)
+    list_lenght = len(self._operations)
+    if (list_lenght > 0):
+      last_op = self._operations[list_lenght-1]
+      if (last_op.get_index() == incoming_op.get_index()):
+        if (last_op.get_clock() <= incoming_op.get_clock()):
+          self._operations.append(incoming_op)
+        else:
+          self._operations[list_lenght-1] = incoming_op
+          self._operations.append(last_op)
+      else:
+        self._operations.append(incoming_op)
+    else:
+      self._operations.append(incoming_op)
+
+    self._file.set_file(self._operations)
+    #self._file.insert_operation(incoming_op)
 
   def display(self):
     print('Document content:')
@@ -97,6 +125,8 @@ def insert_operation(ordered_operations, new_operation):
       insertion_index = ordered_operations.index(existing_op)
       break
     elif comparison == 'clock1': # new_operation greater
+      if (ordered_operations.index(existing_op) == len(ordered_operations)-1):
+        insertion_index = len(ordered_operations)
       continue
     else:
       if new_operation.get_replica_id() <= existing_op.get_replica_id():
@@ -104,6 +134,8 @@ def insert_operation(ordered_operations, new_operation):
         insertion_index = ordered_operations.index(existing_op)
         break
       else:
+        if (ordered_operations.index(existing_op) == len(ordered_operations)-1):
+          insertion_index = len(ordered_operations)
         continue
 
   ordered_operations.insert(insertion_index, new_operation)
@@ -115,3 +147,11 @@ def compare_and_order_operations(ordered_operations, new_operations):
     new_ordered_operations = insert_operation(ordered_operations, operation)
 
   return ordered_operations
+
+def there_is_a_conflict(ordered_operations, new_operation):
+  for operation in ordered_operations:
+    comparison = compare(new_operation.get_clock(), operation.get_clock())
+    if (comparison == 'clock2' or comparison == 'conflict'):
+      return True
+
+  return False
