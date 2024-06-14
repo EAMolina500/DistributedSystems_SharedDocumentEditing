@@ -13,7 +13,9 @@ from document import compare_and_order_operations
 from vector_clock import VectorClock
 
 class FunctionTest(unittest.TestCase):
-  # compare function test
+
+  # compare function tests
+
   def test_compare_equal(self):
     clock1 = [1, 2, 3]
     clock2 = [1, 2, 3]
@@ -34,7 +36,7 @@ class FunctionTest(unittest.TestCase):
     clock2 = [0, 2, 3]
     self.assertEqual(compare(clock1, clock2), 'conflict')
 
-  # insert_operation function test
+  # insert_operation function tests
 
   def test_insert_operation_empty(self):
     new_operation = Operation('insert', 0, 'c', [1, 0, 0], '1A')
@@ -74,21 +76,9 @@ class FunctionTest(unittest.TestCase):
     ops = insert_operation(ops, op6)
     ops = insert_operation(ops, op8)
 
-    print('ops:')
-    print(ops)
-
     expected = [op1, op2, op3, op4, op5, op6, op7, op8, op9]
 
     self.assertEqual(ops, expected)
-
-  """
-  def test_insert_operation_conflict_replica_id_1(self):
-    operations = [Operation('insert', 0, 'd', [3, 1, 0], '1A')]
-    new_operation = Operation('insert', 0, 'e', [2, 1, 0], '2B')
-    expected = [operations[0], new_operation]
-    self.assertEqual(insert_operation(operations, new_operation), expected)
-  """
-  # Puedes agregar más tests para la función compare_and_order_operations si lo deseas
 
 if __name__ == "__main__":
   unittest.main()
