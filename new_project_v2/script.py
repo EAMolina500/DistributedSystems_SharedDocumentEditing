@@ -13,7 +13,7 @@ if __name__ == "__main__":
   ins = 'insert'
   rem = 'delete'
 
-  client.run_for_test(server1, ins, 0, 'a', port1)
+  client.run_for_test(server3, ins, 0, 'a', port3)
   client.run_for_test(server2, ins, 1, 'b', port2)
   client.run_for_test(server3, ins, 2, 'c', port3)
   client.run_for_test(server1, ins, 3, 'd', port1)

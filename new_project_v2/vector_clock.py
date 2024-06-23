@@ -16,12 +16,13 @@ class VectorClock:
 
   def increment(self):
     index = self._server_id - 1
-    self._clock[index] += 1
+    clock = self._clock
+    clock[index] += 1
+    return clock
 
-  def compute_new(self, other_clock):
+  def compute_new(clock, other_clock):
     #pdb.set_trace()
-    new_clock = [max(a, b) for a, b in zip(self._clock, other_clock.get_clock())]
-    self._clock = new_clock
+    return [max(a, b) for a, b in zip(clock, other_clock)]
 
   def compare(self, other_clock):
     differences = [a - b for a, b in zip(self._clock, other_clock.get_clock())]

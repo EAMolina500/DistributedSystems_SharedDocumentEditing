@@ -37,39 +37,15 @@ class Document:
 
   def insert(self, index, char, vector_clock, replica_id):
     incoming_op = Operation('insert', int(index), char, vector_clock, replica_id)
-    list_lenght = len(self._operations)
-    if (list_lenght > 0):
-      last_op = self._operations[list_lenght-1]
-      if (last_op.get_index() == incoming_op.get_index()):
-        if (last_op.get_clock() <= incoming_op.get_clock()):
-          self._operations.append(incoming_op)
-        else:
-          self._operations[list_lenght-1] = incoming_op
-          self._operations.append(last_op)
-      else:
-        self._operations.append(incoming_op)
-    else:
-      self._operations.append(incoming_op)
-
+    #self._operations.append(incoming_op)
+    insert_operation_v2(self._operations, incoming_op)
     self._file.set_file(self._operations)
     #self._file.insert_operation(incoming_op)
 
   def delete(self, index, vector_clock, replica_id):
     incoming_op = Operation('delete', int(index), None, vector_clock, replica_id)
-    list_lenght = len(self._operations)
-    if (list_lenght > 0):
-      last_op = self._operations[list_lenght-1]
-      if (last_op.get_index() == incoming_op.get_index()):
-        if (last_op.get_clock() <= incoming_op.get_clock()):
-          self._operations.append(incoming_op)
-        else:
-          self._operations[list_lenght-1] = incoming_op
-          self._operations.append(last_op)
-      else:
-        self._operations.append(incoming_op)
-    else:
-      self._operations.append(incoming_op)
-
+    insert_operation_v2(self._operations, incoming_op)
+    #self._operations.append(incoming_op)
     self._file.set_file(self._operations)
     #self._file.insert_operation(incoming_op)
 
@@ -102,6 +78,37 @@ def compare(clock1, clock2):
     return 'clock2'
   else:
     return 'conflict'
+
+def insert_operation_v2(ordered_operations, new_operation):
+
+  if ordered_operations is None:
+    return [new_operation]
+
+  # arriba los casos "negativos"
+  ordered_operations.reverse()
+  index = -1
+  for curr_operation in ordered_operations:
+    comp_result = compare(new_operation.get_clock(), curr_operation.get_clock())
+    if comp_result == 'clock1': # new_operation greater
+      index = ordered_operations.index(curr_operation)
+      break
+    elif comp_result == 'clock2':
+      index = ordered_operations.index(curr_operation) + 1
+      break
+    elif comp_result == 'equal':
+      # system exception
+      print('EXCEPTION !!!')
+    else: # there's a conflict
+      if new_operation.get_replica_id() > curr_operation.get_replica_id():
+        index = ordered_operations.index(curr_operation)
+        break
+      else:
+        index = ordered_operations.index(curr_operation) + 1
+        break
+
+  ordered_operations.insert(index, new_operation)
+  ordered_operations.reverse()
+  return ordered_operations
 
 def insert_operation(ordered_operations, new_operation):
   """

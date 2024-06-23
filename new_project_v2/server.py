@@ -7,6 +7,7 @@ import document_pb2_grpc
 from document import Document
 from vector_clock import VectorClock
 from operation import Operation
+from copy import copy
 
 import sys
 
@@ -21,8 +22,9 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     if self._document.get_operations():
       self._vector_clock = self._document.get_last_clock()
     else:
-      self._vector_clock = VectorClock(server_id)
+      self._vector_clock = [0,0,0]
 
+    """
     if (self._server_id == 1):
       got_it = request_pending_messages(self._document, '50052')
       if not got_it:
@@ -35,6 +37,7 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
       got_it = request_pending_messages(self._document, '50051')
       if not got_it:
         request_pending_messages(self._document, '50052')
+    """
 
   def gen_replica_id(self):
     self._ops_number += 1
@@ -50,46 +53,36 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
 
   # methods that listen client requests
   def InsertCommand(self, request, context):
-    print('El client envio: %s' % request)
-
-    print('Insert command - SEND:\n')
-    print('Vector before increment:\n')
-    print(self._vector_clock)
-
-    self._vector_clock.increment()
-    print('Vector after increment:\n')
-    print(self._vector_clock)
+    print("Insert Command - Server Nro %d\n", self._server_id)
+    print('El client envio: %s\n' % request)
+    print('--- --- --- --- ---\n')
+    self._vector_clock[self._server_id - 1] += 1
     replica_id = self.gen_replica_id()
 
-    self._document.insert(request.index, request.char, self._vector_clock.get_clock(), replica_id)
+    self._document.insert(request.index, request.char, copy(self._vector_clock), replica_id)
     self._document.apply_operations()
     self._document.display()
 
     try:
-      send_to_other_servers('insert', request.index, request.char, self._vector_clock.get_clock(), replica_id, self._server_id)
+      send_to_other_servers('insert', request.index, request.char, copy(self._vector_clock), replica_id, self._server_id)
     except:
       self._pending_msgs[get_server_port(self._server_id)]
 
     return document_pb2.Response(message='The insert command sent by client was applied')
 
   def DeleteCommand(self, request, context):
-    print('El client envio: %s' % request)
-
-    print('Delete command - SEND:\n')
-    print('Vector before increment:\n')
-    print(self._vector_clock)
-
-    self._vector_clock.increment()
-    print('Vector after increment:\n')
-    print(self._vector_clock)
+    print("Delete Command - Server Nro %d\n", self._server_id)
+    print('El client envio: %s\n' % request)
+    print('--- --- --- --- ---\n')
+    self._vector_clock[self._server_id - 1] += 1
     replica_id = self.gen_replica_id()
 
-    self._document.delete(request.index, self._vector_clock.get_clock(), replica_id)
+    self._document.delete(request.index, copy(self._vector_clock), replica_id)
     self._document.apply_operations()
     self._document.display()
 
     try:
-      send_to_other_servers('delete', request.index, None, self._vector_clock.get_clock(), replica_id, self._server_id)
+      send_to_other_servers('delete', request.index, None, copy(self._vector_clock), replica_id, self._server_id)
     except:
       self._pending_msgs[get_server_port(self._server_id)]
 
@@ -97,53 +90,31 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
 
   # methods that communicate commands to others servers
   def SendInsert(self, request, context):
+    print("SEND - Insert Command - Server Nro %d\n", self._server_id)
     print('El server envio: %s' % request)
+    print('--- --- --- --- ---\n')
 
-    print('Insert command - GET:\n')
-    print('Vector before increment:\n')
-    print(self._vector_clock)
+    self._vector_clock[self._server_id - 1] += 1
+    sent_vector_clock = list(request.timestamp)
+    new_clock = compute_new(self._vector_clock, sent_vector_clock)
+    self._vector_clock = new_clock
 
-    self._vector_clock.increment()
-
-    print('Vector after increment:\n')
-    print(self._vector_clock)
-
-    sent_vector_clock = VectorClock(self._server_id, list(request.timestamp))
-    self._vector_clock.compute_new(sent_vector_clock)
-
-    print('New vector:\n')
-    print(self._vector_clock)
-
-    print('Sent vector clock:\n')
-    print(sent_vector_clock)
-
-    self._document.insert(request.index, request.char, sent_vector_clock.get_clock(), request.replica_id)
+    self._document.insert(request.index, request.char, sent_vector_clock, request.replica_id)
     self._document.apply_operations()
     self._document.display()
     return document_pb2.Response(message='The insert command sent by server was applied')
 
   def SendDelete(self, request, context):
+    print("SEND - Insert Command - Server Nro %d\n", self._server_id)
     print('El server envio: %s' % request)
+    print('--- --- --- --- ---\n')
 
-    print('Delete command - GET:\n')
-    print('Vector before increment:\n')
-    print(self._vector_clock)
+    self._vector_clock[self._server_id - 1] += 1
+    sent_vector_clock = list(request.timestamp)
+    new_clock = compute_new(self._vector_clock, sent_vector_clock)
+    self._vector_clock = new_clock
 
-    self._vector_clock.increment()
-
-    print('Vector after increment:\n')
-    print(self._vector_clock)
-
-    sent_vector_clock = VectorClock(self._server_id, list(request.timestamp))
-    self._vector_clock.compute_new(sent_vector_clock)
-
-    print('New vector:\n')
-    print(self._vector_clock)
-
-    print('Sent vector clock:\n')
-    print(sent_vector_clock)
-
-    self._document.delete(request.index, sent_vector_clock.get_clock(), request.replica_id)
+    self._document.delete(request.index, sent_vector_clock, request.replica_id)
     self._document.apply_operations()
     self._document.display()
     return document_pb2.Response(message='The delete command sent by server was applied')
@@ -157,6 +128,12 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
         params.append(op_to_params(op, self._server_id))
 
     return document_pb2.ParamsList(params=params)
+
+def compute_new(clock, other_clock):
+  #pdb.set_trace()
+  new_clock = [max(a, b) for a, b in zip(clock, other_clock)]
+  print('new clock: ' + str(new_clock) + '\n')
+  return new_clock
 
 def op_to_params(op, server_id):
   return document_pb2.Params(
