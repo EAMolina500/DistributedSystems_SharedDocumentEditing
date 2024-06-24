@@ -77,3 +77,7 @@ class AuxiliarFunctions:
       replica_id += 'C'
 
     return replica_id
+
+  @staticmethod
+  def get_initial_clock():
+    return [0,0,0]

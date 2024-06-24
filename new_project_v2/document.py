@@ -9,7 +9,6 @@ class Document:
     self._server_id = server_id
     self._file_name = 'server_' + str(self._server_id) + '_file'
     self._file = file.File(self._file_name)
-    self._last_clock = [0,0,0]
 
     if not self._file.is_empty():
       self._operations = self._file.get_content()
@@ -19,14 +18,13 @@ class Document:
     return self._operations
 
   def set_operations(self, operations):
-    # solucion temporal
     self._content = []
     self._operations = operations
     self.apply_operations()
     self.display()
 
   def get_last_clock(self):
-    greater_clock = [0,0,0]
+    greater_clock = AUX.get_initial_clock()
 
     for op in self._operations:
       if op.get_clock() > greater_clock:

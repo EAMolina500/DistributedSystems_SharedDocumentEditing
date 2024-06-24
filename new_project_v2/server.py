@@ -20,20 +20,9 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     if self._document.get_operations():
       self._vector_clock = self._document.get_last_clock()
     else:
-      self._vector_clock = [0,0,0]
+      self._vector_clock = AUX.get_initial_clock()
 
-    if (self._server_id == 1):
-      got_it = request_pending_messages(self._document, '50052')
-      if not got_it:
-        request_pending_messages(self._document, '50053')
-    elif (self._server_id == 2):
-      got_it = request_pending_messages(self._document, '50051')
-      if not got_it:
-        request_pending_messages(self._document, '50053')
-    elif (self._server_id == 3):
-      got_it = request_pending_messages(self._document, '50051')
-      if not got_it:
-        request_pending_messages(self._document, '50052')
+    handle_pending_messages(self._server_id, self._document)
 
   def gen_replica_id(self):
     self._operations_number += 1
@@ -54,8 +43,8 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
 
     try:
       send_to_other_servers('insert', request.index, request.char, vector_clock_copy, replica_id, self._server_id)
-    except:
-      print('Exception to SEND MSGS TO ANOTHER SERVER')
+    except Exception as e:
+      print(f'Unexpected exception occurred while sending message to another server: {e}')
 
     return document_pb2.Response(message='The insert command sent by client was applied')
 
@@ -72,8 +61,8 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
 
     try:
       send_to_other_servers('delete', request.index, None, vector_clock_copy, replica_id, self._server_id)
-    except:
-      print('Exception to SEND MSGS TO ANOTHER SERVER')
+    except Exception as e:
+      print(f'Unexpected exception occurred while sending message to another server: {e}')
 
     return document_pb2.Response(message='The delete command sent by client was applied')
 
@@ -115,6 +104,20 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
 
 # Auxiliar functions to communication between servers
 
+def handle_pending_messages(server_id, document):
+  if server_id == 1:
+    request_pending_messages_from(document, '50052', '50053')
+  elif server_id == 2:
+    request_pending_messages_from(document, '50051', '50053')
+  elif server_id == 3:
+    request_pending_messages_from(document, '50051', '50052')
+
+def request_pending_messages_from(document, port1, port2):
+  if not request_pending_messages(document, port1):
+    if not request_pending_messages(document, port2):
+      print("Warning: Document may not be fully updated due to communication issues with other servers.")
+
+
 def request_pending_messages(document, port):
   try:
     with grpc.insecure_channel('localhost:' + port) as channel:
@@ -128,8 +131,9 @@ def request_pending_messages(document, port):
 
       document.set_operations(ops)
       return True
-  except:
-    print("server doesn't response")
+
+  except Exception:
+    print("Error: Failed to communicate with server or server is not responding.")
     return False
 
 
@@ -142,9 +146,8 @@ def send_to_other_server(command, index, char, port, timestamp, replica_id, serv
       elif (command == 'delete'):
         response = stub.SendDelete(document_pb2.DeleteParams(index=int(index), server_id=server_id, tumbstamp=True, timestamp=timestamp, replica_id=replica_id))
 
-      print("Document client received: " + response.message)
-  except:
-    print("server doesn't works")
+  except Exception:
+    print("Error: Failed to communicate with server or server is not responding.")
 
 def send_to_other_servers(command, index, char, timestamp, replica_id, server_id):
   if (server_id == 1):
