@@ -8,6 +8,7 @@ from document import Document
 from vector_clock import VectorClock
 from operation import Operation
 from copy import copy
+from auxiliar_functions import AuxiliarFunctions as AUX
 
 import sys
 
@@ -16,8 +17,6 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     self._document = Document(server_id)
     self._server_id = int(server_id)
     self._ops_number = 0
-    # esto va a funcionar siempre que el server no se caiga
-    self._pending_msgs = {'50051': False, '50052': False, '50053': False}
 
     if self._document.get_operations():
       self._vector_clock = self._document.get_last_clock()
@@ -55,7 +54,7 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     print('El client envio: %s\n' % request)
     print('--- --- --- --- ---\n')
 
-    self._vector_clock = increment(self._vector_clock, self._server_id)
+    self._vector_clock = AUX.increment(self._vector_clock, self._server_id)
     vector_clock_copy = copy(self._vector_clock)
     replica_id = self.gen_replica_id()
 
@@ -66,7 +65,7 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     try:
       send_to_other_servers('insert', request.index, request.char, vector_clock_copy, replica_id, self._server_id)
     except:
-      self._pending_msgs[get_server_port(self._server_id)]
+      print('Exception to SEND MSGS TO ANOTHER SERVER')
 
     return document_pb2.Response(message='The insert command sent by client was applied')
 
@@ -75,7 +74,7 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     print('El client envio: %s\n' % request)
     print('--- --- --- --- ---\n')
 
-    self._vector_clock = increment(self._vector_clock, self._server_id)
+    self._vector_clock = AUX.increment(self._vector_clock, self._server_id)
     vector_clock_copy = copy(self._vector_clock)
     replica_id = self.gen_replica_id()
 
@@ -86,7 +85,7 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     try:
       send_to_other_servers('delete', request.index, None, vector_clock_copy, replica_id, self._server_id)
     except:
-      self._pending_msgs[get_server_port(self._server_id)]
+      print('Exception to SEND MSGS TO ANOTHER SERVER')
 
     return document_pb2.Response(message='The delete command sent by client was applied')
 
@@ -96,9 +95,9 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     print('El server envio: %s' % request)
     print('--- --- --- --- ---\n')
 
-    self._vector_clock = increment(self._vector_clock, self._server_id)
+    self._vector_clock = AUX.increment(self._vector_clock, self._server_id)
     sent_vector_clock = list(request.timestamp)
-    self._vector_clock = compute_new(self._vector_clock, sent_vector_clock)
+    self._vector_clock = AUX.compute_new(self._vector_clock, sent_vector_clock)
 
     self._document.insert(request.index, request.char, sent_vector_clock, request.replica_id)
     self._document.apply_operations()
@@ -110,9 +109,9 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     print('El server envio: %s' % request)
     print('--- --- --- --- ---\n')
 
-    self._vector_clock = increment(self._vector_clock, self._server_id)
+    self._vector_clock = AUX.increment(self._vector_clock, self._server_id)
     sent_vector_clock = list(request.timestamp)
-    self._vector_clock = compute_new(self._vector_clock, sent_vector_clock)
+    self._vector_clock = AUX.compute_new(self._vector_clock, sent_vector_clock)
 
     self._document.delete(request.index, sent_vector_clock, request.replica_id)
     self._document.apply_operations()
@@ -125,36 +124,9 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
 
     if len(operations) > 0:
       for op in operations:
-        params.append(operation_to_params(op, self._server_id))
+        params.append(AUX.operation_to_params(op, self._server_id))
 
     return document_pb2.ParamsList(params=params)
-
-def compute_new(clock, other_clock):
-  return [max(a, b) for a, b in zip(clock, other_clock)]
-
-def increment(vector_clock, server_id):
-  index = server_id - 1
-  vector_clock[index] += 1
-  return vector_clock
-
-def operation_to_params(op, server_id):
-  return document_pb2.Params(
-    operation=op.get_name(),
-    index=op.get_index(),
-    char=op.get_char(),
-    server_id=server_id,
-    tumbstamp =op.get_deleted(),
-    timestamp =op.get_clock(),
-    replica_id =op.get_replica_id()
-  )
-
-def get_server_port(server_id):
-  if (server_id == 1):
-    return 50051
-  elif (server_id == 2):
-    return 50052
-  elif (server_id == 3):
-    return 50053
 
 def request_pending_messages(document, port):
   try:
