@@ -10,7 +10,6 @@ from operation import Operation
 from document import compare
 from document import insert_operation
 from document import compare_and_order_operations
-from vector_clock import VectorClock
 
 class FunctionTest(unittest.TestCase):
 
