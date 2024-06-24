@@ -13,7 +13,6 @@ class Document:
 
     if not self._file.is_empty():
       self._operations = self._file.get_content()
-      #self._operations = compare_and_order_operations([], self._operations)
       self.apply_operations()
 
   def get_operations(self):
@@ -37,17 +36,13 @@ class Document:
 
   def insert(self, index, char, vector_clock, replica_id):
     incoming_op = Operation('insert', int(index), char, vector_clock, replica_id)
-    #self._operations.append(incoming_op)
     insert_operation_v2(self._operations, incoming_op)
     self._file.set_file(self._operations)
-    #self._file.insert_operation(incoming_op)
 
   def delete(self, index, vector_clock, replica_id):
     incoming_op = Operation('delete', int(index), None, vector_clock, replica_id)
     insert_operation_v2(self._operations, incoming_op)
-    #self._operations.append(incoming_op)
     self._file.set_file(self._operations)
-    #self._file.insert_operation(incoming_op)
 
   def display(self):
     print('Document content:')

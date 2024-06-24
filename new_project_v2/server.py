@@ -54,15 +54,17 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     print("Insert Command - Server Nro %d\n", self._server_id)
     print('El client envio: %s\n' % request)
     print('--- --- --- --- ---\n')
-    self._vector_clock[self._server_id - 1] += 1
+
+    self._vector_clock = increment(self._vector_clock, self._server_id)
+    vector_clock_copy = copy(self._vector_clock)
     replica_id = self.gen_replica_id()
 
-    self._document.insert(request.index, request.char, copy(self._vector_clock), replica_id)
+    self._document.insert(request.index, request.char, vector_clock_copy, replica_id)
     self._document.apply_operations()
     self._document.display()
 
     try:
-      send_to_other_servers('insert', request.index, request.char, copy(self._vector_clock), replica_id, self._server_id)
+      send_to_other_servers('insert', request.index, request.char, vector_clock_copy, replica_id, self._server_id)
     except:
       self._pending_msgs[get_server_port(self._server_id)]
 
@@ -72,15 +74,17 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     print("Delete Command - Server Nro %d\n", self._server_id)
     print('El client envio: %s\n' % request)
     print('--- --- --- --- ---\n')
-    self._vector_clock[self._server_id - 1] += 1
+
+    self._vector_clock = increment(self._vector_clock, self._server_id)
+    vector_clock_copy = copy(self._vector_clock)
     replica_id = self.gen_replica_id()
 
-    self._document.delete(request.index, copy(self._vector_clock), replica_id)
+    self._document.delete(request.index, vector_clock_copy, replica_id)
     self._document.apply_operations()
     self._document.display()
 
     try:
-      send_to_other_servers('delete', request.index, None, copy(self._vector_clock), replica_id, self._server_id)
+      send_to_other_servers('delete', request.index, None, vector_clock_copy, replica_id, self._server_id)
     except:
       self._pending_msgs[get_server_port(self._server_id)]
 
@@ -92,10 +96,9 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     print('El server envio: %s' % request)
     print('--- --- --- --- ---\n')
 
-    self._vector_clock[self._server_id - 1] += 1
+    self._vector_clock = increment(self._vector_clock, self._server_id)
     sent_vector_clock = list(request.timestamp)
-    new_clock = compute_new(self._vector_clock, sent_vector_clock)
-    self._vector_clock = new_clock
+    self._vector_clock = compute_new(self._vector_clock, sent_vector_clock)
 
     self._document.insert(request.index, request.char, sent_vector_clock, request.replica_id)
     self._document.apply_operations()
@@ -107,10 +110,9 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     print('El server envio: %s' % request)
     print('--- --- --- --- ---\n')
 
-    self._vector_clock[self._server_id - 1] += 1
+    self._vector_clock = increment(self._vector_clock, self._server_id)
     sent_vector_clock = list(request.timestamp)
-    new_clock = compute_new(self._vector_clock, sent_vector_clock)
-    self._vector_clock = new_clock
+    self._vector_clock = compute_new(self._vector_clock, sent_vector_clock)
 
     self._document.delete(request.index, sent_vector_clock, request.replica_id)
     self._document.apply_operations()
@@ -119,21 +121,23 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
 
   def SendPendingMessages(self, request, context):
     params = []
-    ops = self._document.get_operations()
+    operations = self._document.get_operations()
 
-    if len(ops) > 0:
-      for op in ops:
-        params.append(op_to_params(op, self._server_id))
+    if len(operations) > 0:
+      for op in operations:
+        params.append(operation_to_params(op, self._server_id))
 
     return document_pb2.ParamsList(params=params)
 
 def compute_new(clock, other_clock):
-  #pdb.set_trace()
-  new_clock = [max(a, b) for a, b in zip(clock, other_clock)]
-  print('new clock: ' + str(new_clock) + '\n')
-  return new_clock
+  return [max(a, b) for a, b in zip(clock, other_clock)]
 
-def op_to_params(op, server_id):
+def increment(vector_clock, server_id):
+  index = server_id - 1
+  vector_clock[index] += 1
+  return vector_clock
+
+def operation_to_params(op, server_id):
   return document_pb2.Params(
     operation=op.get_name(),
     index=op.get_index(),
