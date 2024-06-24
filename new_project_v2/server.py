@@ -24,7 +24,6 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     else:
       self._vector_clock = [0,0,0]
 
-    """
     if (self._server_id == 1):
       got_it = request_pending_messages(self._document, '50052')
       if not got_it:
@@ -37,7 +36,6 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
       got_it = request_pending_messages(self._document, '50051')
       if not got_it:
         request_pending_messages(self._document, '50052')
-    """
 
   def gen_replica_id(self):
     self._ops_number += 1

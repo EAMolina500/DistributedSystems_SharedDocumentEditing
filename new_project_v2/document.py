@@ -33,7 +33,7 @@ class Document:
       if op.get_clock() > greater_clock:
         greater_clock = op.get_clock()
 
-    return VectorClock(self._server_id, greater_clock)
+    return greater_clock
 
   def insert(self, index, char, vector_clock, replica_id):
     incoming_op = Operation('insert', int(index), char, vector_clock, replica_id)

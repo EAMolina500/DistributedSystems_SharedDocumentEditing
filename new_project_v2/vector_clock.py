@@ -20,9 +20,9 @@ class VectorClock:
     clock[index] += 1
     return clock
 
-  def compute_new(clock, other_clock):
+  def compute_new(other_clock):
     #pdb.set_trace()
-    return [max(a, b) for a, b in zip(clock, other_clock)]
+    return [max(a, b) for a, b in zip(self._clock, other_clock)]
 
   def compare(self, other_clock):
     differences = [a - b for a, b in zip(self._clock, other_clock.get_clock())]
