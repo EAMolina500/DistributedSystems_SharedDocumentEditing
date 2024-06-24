@@ -1,5 +1,4 @@
 from operation import Operation
-from vector_clock import VectorClock
 import file
 from auxiliar_functions import AuxiliarFunctions as AUX
 

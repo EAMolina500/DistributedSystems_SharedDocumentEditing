@@ -5,7 +5,6 @@ import document_pb2
 import document_pb2_grpc
 
 from document import Document
-from vector_clock import VectorClock
 from operation import Operation
 from copy import copy
 from auxiliar_functions import AuxiliarFunctions as AUX
@@ -16,7 +15,7 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
   def __init__(self, server_id):
     self._document = Document(server_id)
     self._server_id = int(server_id)
-    self._ops_number = 0
+    self._operations_number = 0
 
     if self._document.get_operations():
       self._vector_clock = self._document.get_last_clock()
@@ -37,22 +36,13 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
         request_pending_messages(self._document, '50052')
 
   def gen_replica_id(self):
-    self._ops_number += 1
-    replica_id = str(self._ops_number)
-    if (self._server_id == 1):
-      replica_id += 'A'
-    elif (self._server_id == 2):
-      replica_id += 'B'
-    elif (self._server_id == 3):
-      replica_id += 'C'
+    self._operations_number += 1
+    return AUX.gen_replica_id(self._server_id, self._operations_number)
 
-    return replica_id
+  # Methods that listen client requests
 
-  # methods that listen client requests
   def InsertCommand(self, request, context):
-    print("Insert Command - Server Nro %d\n", self._server_id)
     print('El client envio: %s\n' % request)
-    print('--- --- --- --- ---\n')
 
     self._vector_clock = AUX.increment(self._vector_clock, self._server_id)
     vector_clock_copy = copy(self._vector_clock)
@@ -70,9 +60,7 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     return document_pb2.Response(message='The insert command sent by client was applied')
 
   def DeleteCommand(self, request, context):
-    print("Delete Command - Server Nro %d\n", self._server_id)
     print('El client envio: %s\n' % request)
-    print('--- --- --- --- ---\n')
 
     self._vector_clock = AUX.increment(self._vector_clock, self._server_id)
     vector_clock_copy = copy(self._vector_clock)
@@ -89,11 +77,10 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
 
     return document_pb2.Response(message='The delete command sent by client was applied')
 
-  # methods that communicate commands to others servers
+  # Methods that communicate commands to others servers
+
   def SendInsert(self, request, context):
-    print("SEND - Insert Command - Server Nro %d\n", self._server_id)
     print('El server envio: %s' % request)
-    print('--- --- --- --- ---\n')
 
     self._vector_clock = AUX.increment(self._vector_clock, self._server_id)
     sent_vector_clock = list(request.timestamp)
@@ -105,9 +92,7 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     return document_pb2.Response(message='The insert command sent by server was applied')
 
   def SendDelete(self, request, context):
-    print("SEND - Insert Command - Server Nro %d\n", self._server_id)
     print('El server envio: %s' % request)
-    print('--- --- --- --- ---\n')
 
     self._vector_clock = AUX.increment(self._vector_clock, self._server_id)
     sent_vector_clock = list(request.timestamp)
@@ -128,6 +113,8 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
 
     return document_pb2.ParamsList(params=params)
 
+# Auxiliar functions to communication between servers
+
 def request_pending_messages(document, port):
   try:
     with grpc.insecure_channel('localhost:' + port) as channel:
@@ -139,16 +126,10 @@ def request_pending_messages(document, port):
         op = Operation(params.operation, params.index, params.char, params.timestamp, params.replica_id)
         ops.append(op)
 
-      print('ops:')
-      print(ops)
-
-      #ops.reverse()
       document.set_operations(ops)
-
       return True
   except:
     print("server doesn't response")
-
     return False
 
 
@@ -157,15 +138,12 @@ def send_to_other_server(command, index, char, port, timestamp, replica_id, serv
     with grpc.insecure_channel('localhost:' + port) as channel:
       stub = document_pb2_grpc.DocumentServiceStub(channel)
       if (command == 'insert'):
-        #falta agregar replica_id
         response = stub.SendInsert(document_pb2.InsertParams(index=int(index), char=char, server_id=server_id, tumbstamp=False, timestamp=timestamp, replica_id=replica_id))
       elif (command == 'delete'):
-        #falta agregar replica_id
         response = stub.SendDelete(document_pb2.DeleteParams(index=int(index), server_id=server_id, tumbstamp=True, timestamp=timestamp, replica_id=replica_id))
 
       print("Document client received: " + response.message)
   except:
-    # esto va a funcionar siempre que el server no se caiga
     print("server doesn't works")
 
 def send_to_other_servers(command, index, char, timestamp, replica_id, server_id):
@@ -178,6 +156,8 @@ def send_to_other_servers(command, index, char, timestamp, replica_id, server_id
   elif (server_id == 3):
     send_to_other_server(command, index, char, '50051', timestamp, replica_id, server_id)
     send_to_other_server(command, index, char, '50052', timestamp, replica_id, server_id)
+
+# Main code
 
 def serve(server_id, port):
   document = DocumentService(server_id)
@@ -200,4 +180,4 @@ if __name__ == "__main__":
   elif (server_id == '3'):
     port = '50053'
 
-  serve(int(server_id), port)
+  serve(server_id, port)

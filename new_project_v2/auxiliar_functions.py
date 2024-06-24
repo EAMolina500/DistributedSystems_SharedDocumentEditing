@@ -70,3 +70,14 @@ class AuxiliarFunctions:
       timestamp =op.get_clock(),
       replica_id =op.get_replica_id()
     )
+
+  def gen_replica_id(server_id, operations_number):
+    replica_id = str(operations_number)
+    if (server_id == 1):
+      replica_id += 'A'
+    elif (server_id == 2):
+      replica_id += 'B'
+    elif (server_id == 3):
+      replica_id += 'C'
+
+    return replica_id
