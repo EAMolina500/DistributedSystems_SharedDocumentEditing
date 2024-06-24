@@ -63,5 +63,31 @@ class FunctionTest(unittest.TestCase):
     expected = [operations[0], new_operation]
     self.assertEqual(AUX.insert_operation(operations, new_operation), expected)
 
+  def test_insert_in_middle_by_clock(self):
+    operations = [
+      Operation('insert', 0, 'a', [2, 1, 0], '1A'),
+      Operation('insert', 0, 'c', [3, 1, 0], '1C')
+    ]
+    new_operation = Operation('insert', 0, 'b', [2, 0, 0], '1B')
+    expected = [
+      operations[0],
+      new_operation,
+      operations[1]
+    ]
+    self.assertEqual(AUX.insert_operation(operations, new_operation), expected)
+
+  def test_insert_in_middle_by_replica_id(self):
+    operations = [
+      Operation('insert', 0, 'a', [2, 1, 0], '1A'),
+      Operation('insert', 0, 'c', [2, 0, 1], '1C')
+    ]
+    new_operation = Operation('insert', 0, 'b', [2, 0, 0], '1B')
+    expected = [
+      operations[0],
+      new_operation,
+      operations[1]
+    ]
+    self.assertEqual(AUX.insert_operation(operations, new_operation), expected)
+
 if __name__ == "__main__":
   unittest.main()

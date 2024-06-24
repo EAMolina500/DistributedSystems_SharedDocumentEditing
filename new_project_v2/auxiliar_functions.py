@@ -29,19 +29,14 @@ class AuxiliarFunctions:
       if comp_result == 'clock1': # new_operation greater
         index = ordered_operations.index(curr_operation)
         break
-      elif comp_result == 'clock2':
+      elif comp_result == 'clock2' or comp_result == 'equal':
         index = ordered_operations.index(curr_operation) + 1
-        break
-      elif comp_result == 'equal':
-        # system exception
-        print('EXCEPTION !!!')
       else: # there's a conflict
         if new_operation.get_replica_id() > curr_operation.get_replica_id():
           index = ordered_operations.index(curr_operation)
           break
         else:
           index = ordered_operations.index(curr_operation) + 1
-          break
 
     ordered_operations.insert(index, new_operation)
     ordered_operations.reverse()
@@ -71,6 +66,7 @@ class AuxiliarFunctions:
       replica_id =op.get_replica_id()
     )
 
+  @staticmethod
   def gen_replica_id(server_id, operations_number):
     replica_id = str(operations_number)
     if (server_id == 1):
