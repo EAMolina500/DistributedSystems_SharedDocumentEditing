@@ -18,6 +18,8 @@ def run(server_id, server_port):
     elif (command == 'delete'):
       params = get_delete_params()
       response = stub.DeleteCommand(document_pb2.Delete(index=params['index']))
+    elif (command == 'display'):
+      response = stub.DisplayCommand(document_pb2.Display(display='display'))
 
     print("Document client received: " + response.message)
 
@@ -43,6 +45,8 @@ def run_for_test(server_id, command, index, char, server_port):
       response = stub.InsertCommand(document_pb2.Insert(index=index, char=char))
     elif (command == 'delete'):
       response = stub.DeleteCommand(document_pb2.Delete(index=index))
+    elif (command == 'display'):
+      response = stub.DisplayCommand(document_pb2.Display(display='display'))
 
     print("Document client received: " + response.message)
 

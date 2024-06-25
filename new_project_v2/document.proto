@@ -7,6 +7,8 @@ service DocumentService {
 
   rpc DeleteCommand (Delete) returns (Response) {}
 
+  rpc DisplayCommand (Display) returns (Response) {}
+
   // server services
 
   rpc SendInsert (InsertParams) returns (Response) {}
@@ -26,6 +28,10 @@ message Char {
 
 message Response {
   string message = 1;
+}
+
+message Display {
+  string display = 1;
 }
 
 

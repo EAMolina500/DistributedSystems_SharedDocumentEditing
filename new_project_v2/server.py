@@ -9,6 +9,8 @@ from operation import Operation
 from copy import copy
 from auxiliar_functions import AuxiliarFunctions as AUX
 
+from threading import Thread, Lock
+
 import sys
 
 class DocumentService(document_pb2_grpc.DocumentServiceServicer):
@@ -16,6 +18,7 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     self._document = Document(server_id)
     self._server_id = int(server_id)
     self._operations_number = 0
+    self._operation_lock = Lock()
 
     if self._document.get_operations():
       self._vector_clock = self._document.get_last_clock()
@@ -31,40 +34,49 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
   # Methods that listen client requests
 
   def InsertCommand(self, request, context):
-    print('El client envio: %s\n' % request)
+    with self._operation_lock:
+      print('El client envio: %s\n' % request)
 
-    self._vector_clock = AUX.increment(self._vector_clock, self._server_id)
-    vector_clock_copy = copy(self._vector_clock)
-    replica_id = self.gen_replica_id()
+      self._vector_clock = AUX.increment(self._vector_clock, self._server_id)
+      vector_clock_copy = copy(self._vector_clock)
+      replica_id = self.gen_replica_id()
 
-    self._document.insert(request.index, request.char, vector_clock_copy, replica_id)
-    self._document.apply_operations()
-    self._document.display()
+      self._document.insert(request.index, request.char, vector_clock_copy, replica_id)
+      self._document.display()
 
-    try:
-      send_to_other_servers('insert', request.index, request.char, vector_clock_copy, replica_id, self._server_id)
-    except Exception as e:
-      print(f'Unexpected exception occurred while sending message to another server: {e}')
+      try:
+        send_to_other_servers('insert', request.index, request.char, vector_clock_copy, replica_id, self._server_id)
+      except Exception as e:
+        print(f'Unexpected exception occurred while sending message to another server: {e}')
 
     return document_pb2.Response(message='The insert command sent by client was applied')
 
   def DeleteCommand(self, request, context):
-    print('El client envio: %s\n' % request)
+    with self._operation_lock:
+      print('El client envio: %s\n' % request)
 
-    self._vector_clock = AUX.increment(self._vector_clock, self._server_id)
-    vector_clock_copy = copy(self._vector_clock)
-    replica_id = self.gen_replica_id()
+      self._vector_clock = AUX.increment(self._vector_clock, self._server_id)
+      vector_clock_copy = copy(self._vector_clock)
+      replica_id = self.gen_replica_id()
 
-    self._document.delete(request.index, vector_clock_copy, replica_id)
-    self._document.apply_operations()
-    self._document.display()
+      self._document.delete(request.index, vector_clock_copy, replica_id)
+      self._document.display()
 
-    try:
-      send_to_other_servers('delete', request.index, None, vector_clock_copy, replica_id, self._server_id)
-    except Exception as e:
-      print(f'Unexpected exception occurred while sending message to another server: {e}')
+      try:
+        send_to_other_servers('delete', request.index, None, vector_clock_copy, replica_id, self._server_id)
+      except Exception as e:
+        print(f'Unexpected exception occurred while sending message to another server: {e}')
 
     return document_pb2.Response(message='The delete command sent by client was applied')
+
+  def DisplayCommand(self, request, context):
+    with self._operation_lock:
+      print('El client envio: %s\n' % request)
+
+      self._document.apply_operations()
+      self._document.display()
+
+    return document_pb2.Response(message='The display command sent by client was applied')
 
   # Methods that communicate commands to others servers
 
@@ -76,7 +88,6 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     self._vector_clock = AUX.compute_new(self._vector_clock, sent_vector_clock)
 
     self._document.insert(request.index, request.char, sent_vector_clock, request.replica_id)
-    self._document.apply_operations()
     self._document.display()
     return document_pb2.Response(message='The insert command sent by server was applied')
 
@@ -88,7 +99,6 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     self._vector_clock = AUX.compute_new(self._vector_clock, sent_vector_clock)
 
     self._document.delete(request.index, sent_vector_clock, request.replica_id)
-    self._document.apply_operations()
     self._document.display()
     return document_pb2.Response(message='The delete command sent by server was applied')
 
@@ -126,7 +136,7 @@ def request_pending_messages(document, port):
 
       ops = []
       for params in response.params:
-        op = Operation(params.operation, params.index, params.char, params.timestamp, params.replica_id)
+        op = Operation(params.operation, params.index, params.char if params.char != '' else None, params.timestamp, params.replica_id)
         ops.append(op)
 
       document.set_operations(ops)

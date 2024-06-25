@@ -25,6 +25,11 @@ class DocumentServiceStub(object):
                 request_serializer=document__pb2.Delete.SerializeToString,
                 response_deserializer=document__pb2.Response.FromString,
                 )
+        self.DisplayCommand = channel.unary_unary(
+                '/DocumentService/DisplayCommand',
+                request_serializer=document__pb2.Display.SerializeToString,
+                response_deserializer=document__pb2.Response.FromString,
+                )
         self.SendInsert = channel.unary_unary(
                 '/DocumentService/SendInsert',
                 request_serializer=document__pb2.InsertParams.SerializeToString,
@@ -53,6 +58,12 @@ class DocumentServiceServicer(object):
         raise NotImplementedError('Method not implemented!')
 
     def DeleteCommand(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def DisplayCommand(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -91,6 +102,11 @@ def add_DocumentServiceServicer_to_server(servicer, server):
             'DeleteCommand': grpc.unary_unary_rpc_method_handler(
                     servicer.DeleteCommand,
                     request_deserializer=document__pb2.Delete.FromString,
+                    response_serializer=document__pb2.Response.SerializeToString,
+            ),
+            'DisplayCommand': grpc.unary_unary_rpc_method_handler(
+                    servicer.DisplayCommand,
+                    request_deserializer=document__pb2.Display.FromString,
                     response_serializer=document__pb2.Response.SerializeToString,
             ),
             'SendInsert': grpc.unary_unary_rpc_method_handler(
@@ -149,6 +165,23 @@ class DocumentService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/DocumentService/DeleteCommand',
             document__pb2.Delete.SerializeToString,
+            document__pb2.Response.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def DisplayCommand(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/DocumentService/DisplayCommand',
+            document__pb2.Display.SerializeToString,
             document__pb2.Response.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

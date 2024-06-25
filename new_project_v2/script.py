@@ -10,21 +10,26 @@ if __name__ == "__main__":
   port1 = '50051'
   port2 = '50052'
   port3 = '50053'
-  ins = 'insert'
-  rem = 'delete'
+  insert = 'insert'
+  delete = 'delete'
+  display = 'display'
 
-  client.run_for_test(server3, ins, 0, 'a', port3)
-  client.run_for_test(server2, ins, 1, 'b', port2)
-  client.run_for_test(server3, ins, 2, 'c', port3)
-  client.run_for_test(server1, rem, 4, '', port1)
-  client.run_for_test(server1, ins, 3, 'd', port1)
-  client.run_for_test(server3, ins, 4, 'e', port3)
-  client.run_for_test(server2, rem, 1, '', port2)
-  client.run_for_test(server2, ins, 5, 'f', port2)
-  client.run_for_test(server1, ins, 6, 'g', port1)
-  client.run_for_test(server3, rem, 2, '', port3)
-  client.run_for_test(server2, ins, 7, 'h', port2)
-  client.run_for_test(server1, ins, 8, 'i', port1)
-  client.run_for_test(server3, ins, 9, 'j', port3)
-  client.run_for_test(server1, rem, 4, '', port1)
-  client.run_for_test(server3, rem, 2, '', port3)
+  client.run_for_test(server3, insert, 0, 'a', port3)
+  client.run_for_test(server2, insert, 1, 'b', port2)
+  client.run_for_test(server3, insert, 2, 'c', port3)
+  client.run_for_test(server1, delete, 4, '', port1)
+  client.run_for_test(server1, insert, 3, 'd', port1)
+  client.run_for_test(server3, insert, 4, 'e', port3)
+  client.run_for_test(server2, delete, 1, '', port2)
+  client.run_for_test(server2, insert, 5, 'f', port2)
+  client.run_for_test(server1, insert, 6, 'g', port1)
+  client.run_for_test(server3, delete, 2, '', port3)
+  client.run_for_test(server2, insert, 7, 'h', port2)
+  client.run_for_test(server1, insert, 8, 'i', port1)
+  client.run_for_test(server3, insert, 9, 'j', port3)
+  client.run_for_test(server1, delete, 4, '', port1)
+  client.run_for_test(server3, delete, 2, '', port3)
+
+  client.run_for_test(server1, display, 0, '', port1)
+  client.run_for_test(server2, display, 0, '', port2)
+  client.run_for_test(server3, display, 0, '', port3)

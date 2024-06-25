@@ -34,12 +34,12 @@ class Document:
 
   def insert(self, index, char, vector_clock, replica_id):
     incoming_op = Operation('insert', int(index), char, vector_clock, replica_id)
-    self._operations = AUX.insert_operation(self._operations, incoming_op)
+    self._operations = AUX.insert_ordered_operations(self._operations, incoming_op)
     self._file.set_file(self._operations)
 
   def delete(self, index, vector_clock, replica_id):
     incoming_op = Operation('delete', int(index), None, vector_clock, replica_id)
-    self._operations = AUX.insert_operation(self._operations, incoming_op)
+    self._operations = AUX.insert_ordered_operations(self._operations, incoming_op)
     self._file.set_file(self._operations)
 
   def display(self):

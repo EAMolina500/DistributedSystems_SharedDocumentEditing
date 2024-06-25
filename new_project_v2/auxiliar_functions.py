@@ -1,5 +1,8 @@
 from operation import Operation
 import document_pb2
+from functools import cmp_to_key
+
+import operation
 
 class AuxiliarFunctions:
 
@@ -16,6 +19,29 @@ class AuxiliarFunctions:
       return 'clock2'
     else:
       return 'conflict'
+
+  def compare_operations(op1, op2):
+    vc1 = op1.get_clock()
+    vc2 = op2.get_clock()
+
+    comp_result = AuxiliarFunctions.compare(vc1, vc2)
+    if comp_result == 'clock2': # vc1 smaller
+      return -1
+    elif comp_result == 'clock1': # vc1 greater
+      return 1
+
+    if op1.get_replica_id() < op2.get_replica_id():
+      return -1
+    elif op1.get_replica_id() > op2.get_replica_id():
+      return 1
+    else:
+      return 0
+
+  @staticmethod
+  def insert_ordered_operations(operations, new_operation):
+    operations.append(new_operation)
+    operations.sort(key=cmp_to_key(AuxiliarFunctions.compare_operations))
+    return operations
 
   @staticmethod
   def insert_operation(ordered_operations, new_operation):
