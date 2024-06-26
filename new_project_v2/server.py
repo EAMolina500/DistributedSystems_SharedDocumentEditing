@@ -1,17 +1,15 @@
-from concurrent import futures
-
+import sys
 import grpc
 import document_pb2
 import document_pb2_grpc
 
+from concurrent import futures
+from threading import Thread, Lock
 from document import Document
 from operation import Operation
 from copy import copy
-from auxiliar_functions import AuxiliarFunctions as AUX
-
-from threading import Thread, Lock
-
-import sys
+from auxiliar_functions import get_initial_clock, gen_replica_id, \
+                        increment, compute_new, operation_to_params
 
 class DocumentService(document_pb2_grpc.DocumentServiceServicer):
   def __init__(self, server_id):
@@ -23,13 +21,13 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     if self._document.get_operations():
       self._vector_clock = self._document.get_last_clock()
     else:
-      self._vector_clock = AUX.get_initial_clock()
+      self._vector_clock = get_initial_clock()
 
     handle_pending_messages(self._server_id, self._document)
 
   def gen_replica_id(self):
     self._operations_number += 1
-    return AUX.gen_replica_id(self._server_id, self._operations_number)
+    return gen_replica_id(self._server_id, self._operations_number)
 
   # Methods that listen client requests
 
@@ -37,7 +35,7 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     with self._operation_lock:
       print('El client envio: %s\n' % request)
 
-      self._vector_clock = AUX.increment(self._vector_clock, self._server_id)
+      self._vector_clock = increment(self._vector_clock, self._server_id)
       vector_clock_copy = copy(self._vector_clock)
       replica_id = self.gen_replica_id()
 
@@ -55,7 +53,7 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
     with self._operation_lock:
       print('El client envio: %s\n' % request)
 
-      self._vector_clock = AUX.increment(self._vector_clock, self._server_id)
+      self._vector_clock = increment(self._vector_clock, self._server_id)
       vector_clock_copy = copy(self._vector_clock)
       replica_id = self.gen_replica_id()
 
@@ -83,9 +81,9 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
   def SendInsert(self, request, context):
     print('El server envio: %s' % request)
 
-    self._vector_clock = AUX.increment(self._vector_clock, self._server_id)
+    self._vector_clock = increment(self._vector_clock, self._server_id)
     sent_vector_clock = list(request.timestamp)
-    self._vector_clock = AUX.compute_new(self._vector_clock, sent_vector_clock)
+    self._vector_clock = compute_new(self._vector_clock, sent_vector_clock)
 
     self._document.insert(request.index, request.char, sent_vector_clock, request.replica_id)
     self._document.display()
@@ -94,9 +92,9 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
   def SendDelete(self, request, context):
     print('El server envio: %s' % request)
 
-    self._vector_clock = AUX.increment(self._vector_clock, self._server_id)
+    self._vector_clock = increment(self._vector_clock, self._server_id)
     sent_vector_clock = list(request.timestamp)
-    self._vector_clock = AUX.compute_new(self._vector_clock, sent_vector_clock)
+    self._vector_clock = compute_new(self._vector_clock, sent_vector_clock)
 
     self._document.delete(request.index, sent_vector_clock, request.replica_id)
     self._document.display()
@@ -108,7 +106,7 @@ class DocumentService(document_pb2_grpc.DocumentServiceServicer):
 
     if len(operations) > 0:
       for op in operations:
-        params.append(AUX.operation_to_params(op, self._server_id))
+        params.append(operation_to_params(op, self._server_id))
 
     return document_pb2.ParamsList(params=params)
 

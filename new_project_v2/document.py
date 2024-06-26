@@ -1,6 +1,6 @@
+from file import File
 from operation import Operation
-import file
-from auxiliar_functions import AuxiliarFunctions as AUX
+from auxiliar_functions import get_initial_clock, insert_ordered_operations
 
 class Document:
   def __init__(self, server_id):
@@ -8,7 +8,7 @@ class Document:
     self._operations = []
     self._server_id = server_id
     self._file_name = 'server_' + str(self._server_id) + '_file'
-    self._file = file.File(self._file_name)
+    self._file = File(self._file_name)
 
     if not self._file.is_empty():
       self._operations = self._file.get_content()
@@ -24,7 +24,7 @@ class Document:
     self.display()
 
   def get_last_clock(self):
-    greater_clock = AUX.get_initial_clock()
+    greater_clock = get_initial_clock()
 
     for op in self._operations:
       if op.get_clock() > greater_clock:
@@ -34,12 +34,12 @@ class Document:
 
   def insert(self, index, char, vector_clock, replica_id):
     incoming_op = Operation('insert', int(index), char, vector_clock, replica_id)
-    self._operations = AUX.insert_ordered_operations(self._operations, incoming_op)
+    self._operations = insert_ordered_operations(self._operations, incoming_op)
     self._file.set_file(self._operations)
 
   def delete(self, index, vector_clock, replica_id):
     incoming_op = Operation('delete', int(index), None, vector_clock, replica_id)
-    self._operations = AUX.insert_ordered_operations(self._operations, incoming_op)
+    self._operations = insert_ordered_operations(self._operations, incoming_op)
     self._file.set_file(self._operations)
 
   def display(self):

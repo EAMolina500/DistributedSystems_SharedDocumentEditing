@@ -1,4 +1,3 @@
-
 SERVER_1 = '1'
 SERVER_2 = '2'
 SERVER_3 = '3'

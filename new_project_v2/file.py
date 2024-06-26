@@ -48,7 +48,6 @@ class File:
     operation_obj = None
 
     if len(line_parts) >= 6:
-      #raise ValueError(f"Invalid operation line: {line}")
       name = line_parts[0]
       index = int(line_parts[1])
       char = line_parts[2]
