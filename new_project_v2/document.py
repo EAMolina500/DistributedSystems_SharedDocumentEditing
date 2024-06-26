@@ -43,9 +43,13 @@ class Document:
     self._file.set_file(self._operations)
 
   def display(self):
-    print('Document content:')
-    print(self._operations)
-    print(self._content)
+    if len(self._operations) > 0:
+      print('Document operations:')
+      print(self._operations)
+
+    if len(self._content) > 0:
+      print('Document content:')
+      print(self._content)
 
   def apply_operations(self):
     for op in self._operations:

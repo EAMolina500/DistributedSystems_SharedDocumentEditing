@@ -9,7 +9,7 @@ class File:
       self._file = open(self._name, 'x')
       self._file.close()
     except FileExistsError:
-      print('Constructor exception')
+      print('Constructor exception: File already exists')
       self.get_content_from_file()
 
   def get_content_from_file(self):

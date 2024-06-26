@@ -121,9 +121,13 @@ def handle_pending_messages(server_id, document):
     request_pending_messages_from(document, '50051', '50052')
 
 def request_pending_messages_from(document, port1, port2):
-  if not request_pending_messages(document, port1):
-    if not request_pending_messages(document, port2):
-      print("Warning: Document may not be fully updated due to communication issues with other servers.")
+  try:
+    if request_pending_messages(document, port1) or request_pending_messages(document, port2):
+      print("The server was updated successfully.")
+    else:
+      print("Communication with the other servers was not achieved, the document could be outdated / We will update it when the connection with a server is restored.")
+  except Exception as e:
+    print(f"An error occurred: {e}")
 
 
 def request_pending_messages(document, port):
@@ -141,7 +145,7 @@ def request_pending_messages(document, port):
       return True
 
   except Exception:
-    print("Error: Failed to communicate with server or server is not responding.")
+    print("Warning: Could not communicate with server on port " + port + " or the server is not responding")
     return False
 
 
