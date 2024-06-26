@@ -1,5 +1,6 @@
 from operation import Operation
 import document_pb2
+from bisect import insort
 from functools import cmp_to_key
 
 import operation
@@ -39,9 +40,10 @@ class AuxiliarFunctions:
 
   @staticmethod
   def insert_ordered_operations(operations, new_operation):
-    operations.append(new_operation)
-    operations.sort(key=cmp_to_key(AuxiliarFunctions.compare_operations))
-    return operations
+    comparable_operations = [ComparableOperation(op) for op in operations]
+    new_comparable_operation = ComparableOperation(new_operation)
+    insort(comparable_operations, new_comparable_operation)
+    return [co.operation for co in comparable_operations]
 
   @staticmethod
   def insert_operation(ordered_operations, new_operation):
@@ -107,3 +109,10 @@ class AuxiliarFunctions:
   @staticmethod
   def get_initial_clock():
     return [0,0,0]
+
+class ComparableOperation:
+  def __init__(self, operation):
+    self.operation = operation
+
+  def __lt__(self, other):
+    return AuxiliarFunctions.compare_operations(self.operation, other.operation) < 0

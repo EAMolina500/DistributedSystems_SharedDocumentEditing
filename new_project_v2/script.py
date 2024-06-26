@@ -2,6 +2,7 @@ import server
 import client
 import document
 import time
+import os
 
 if __name__ == "__main__":
   server1 = '1'
@@ -33,3 +34,8 @@ if __name__ == "__main__":
   client.run_for_test(server1, display, 0, '', port1)
   client.run_for_test(server2, display, 0, '', port2)
   client.run_for_test(server3, display, 0, '', port3)
+
+  # Borrar para revisar logs en los archivos
+  os.remove('server_1_file.txt')
+  os.remove('server_2_file.txt')
+  os.remove('server_3_file.txt')
