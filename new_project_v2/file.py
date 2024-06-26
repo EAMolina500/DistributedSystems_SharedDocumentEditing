@@ -59,3 +59,10 @@ class File:
       operation_obj = Operation(name, index, char, vector_clock, replica_id)
 
     return operation_obj
+
+
+def write_file(content):
+  with open('content_file.txt', 'w') as file:
+    for char in content:
+      file.write(char)
+    file.close()

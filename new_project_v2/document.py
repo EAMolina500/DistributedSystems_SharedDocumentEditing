@@ -1,4 +1,4 @@
-from file import File
+from file import File, write_file
 from operation import Operation
 from auxiliar_functions import get_initial_clock, insert_operation
 
@@ -43,6 +43,8 @@ class Document:
     self._file.set_file(self._operations)
 
   def display(self):
+    #write_file(self._content)
+
     if len(self._operations) > 0:
       print('Document operations:')
       print(self._operations)
@@ -50,6 +52,7 @@ class Document:
     if len(self._content) > 0:
       print('Document content:')
       print(self._content)
+
 
   def apply_operations(self):
     for op in self._operations:
