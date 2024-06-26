@@ -1,7 +1,7 @@
 from os import remove
 from client import run_for_test
 from threading import Thread
-from script_constants import SERVER_1, SERVER_2, SERVER_3, PORT_1, PORT_2, PORT_3, \
+from constants import SERVER_1, SERVER_2, SERVER_3, PORT_1, PORT_2, PORT_3, \
                       INSERT, DELETE, DISPLAY, FILE_1_NAME, FILE_2_NAME, FILE_3_NAME
 
 def client_task(server, operation, index, char, port):
@@ -24,7 +24,7 @@ if __name__ == "__main__":
   ]
 
   for op in operations:
-    t = threading.Thread(target=client_task, args=op)
+    t = Thread(target=client_task, args=op)
     threads.append(t)
     t.start()
 
