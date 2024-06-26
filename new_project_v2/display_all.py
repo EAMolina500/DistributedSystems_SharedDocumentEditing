@@ -1,4 +1,4 @@
-from client run_for_test
+from client import run_for_test
 
 if __name__ == "__main__":
   server1 = '1'
