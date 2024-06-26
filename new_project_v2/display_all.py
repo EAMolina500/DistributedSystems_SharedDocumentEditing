@@ -1,4 +1,4 @@
-import client
+from client run_for_test
 
 if __name__ == "__main__":
   server1 = '1'
@@ -9,6 +9,6 @@ if __name__ == "__main__":
   port3 = '50053'
   display = 'display'
 
-  client.run_for_test(server1, display, 0, '', port1)
-  client.run_for_test(server2, display, 0, '', port2)
-  client.run_for_test(server3, display, 0, '', port3)
+  run_for_test(server1, display, 0, '', port1)
+  run_for_test(server2, display, 0, '', port2)
+  run_for_test(server3, display, 0, '', port3)

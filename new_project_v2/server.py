@@ -3,11 +3,11 @@ import grpc
 import document_pb2
 import document_pb2_grpc
 
+from copy import copy
 from concurrent import futures
 from threading import Thread, Lock
 from document import Document
 from operation import Operation
-from copy import copy
 from auxiliar_functions import get_initial_clock, gen_replica_id, \
                         increment, compute_new, operation_to_params
 

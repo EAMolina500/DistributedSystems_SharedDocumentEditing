@@ -36,35 +36,11 @@ def compare_operations(op1, op2):
   else:
     return 0
 
-def insert_ordered_operations(operations, new_operation):
+def insert_operation(operations, new_operation):
   comparable_operations = [ComparableOperation(op) for op in operations]
   new_comparable_operation = ComparableOperation(new_operation)
   insort(comparable_operations, new_comparable_operation)
   return [co.operation for co in comparable_operations]
-
-def insert_operation(ordered_operations, new_operation):
-  if ordered_operations is None:
-    return [new_operation]
-
-  ordered_operations.reverse()
-  index = -1
-  for curr_operation in ordered_operations:
-    comp_result = compare(new_operation.get_clock(), curr_operation.get_clock())
-    if comp_result == 'clock1': # new_operation greater
-      index = ordered_operations.index(curr_operation)
-      break
-    elif comp_result == 'clock2' or comp_result == 'equal':
-      index = ordered_operations.index(curr_operation) + 1
-    else: # there's a conflict
-      if new_operation.get_replica_id() > curr_operation.get_replica_id():
-        index = ordered_operations.index(curr_operation)
-        break
-      else:
-        index = ordered_operations.index(curr_operation) + 1
-
-  ordered_operations.insert(index, new_operation)
-  ordered_operations.reverse()
-  return ordered_operations
 
 # functions used in Server class
 

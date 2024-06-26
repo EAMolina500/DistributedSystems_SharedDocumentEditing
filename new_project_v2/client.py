@@ -1,11 +1,7 @@
-from __future__ import print_function
-
+import sys
 import grpc
 import document_pb2
 import document_pb2_grpc
-
-import sys
-
 
 def run(server_id, server_port):
   with grpc.insecure_channel('localhost:' + server_port) as channel:

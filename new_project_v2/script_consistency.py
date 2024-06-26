@@ -1,5 +1,5 @@
-from client import run_for_test
 from time import sleep
+from client import run_for_test
 from file import File
 from script_constants import SERVER_1, SERVER_2, SERVER_3, PORT_1, PORT_2, PORT_3, \
                       INSERT, DELETE, DISPLAY, FILE_1_NAME, FILE_2_NAME, FILE_3_NAME

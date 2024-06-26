@@ -1,11 +1,11 @@
-import threading
-import client
-import os
+from os import remove
+from client import run_for_test
+from threading import Thread
 from script_constants import SERVER_1, SERVER_2, SERVER_3, PORT_1, PORT_2, PORT_3, \
                       INSERT, DELETE, DISPLAY, FILE_1_NAME, FILE_2_NAME, FILE_3_NAME
 
 def client_task(server, operation, index, char, port):
-  client.run_for_test(server, operation, index, char, port)
+  run_for_test(server, operation, index, char, port)
 
 if __name__ == "__main__":
   threads = []
@@ -31,11 +31,11 @@ if __name__ == "__main__":
   for t in threads:
     t.join()
 
-  client.run_for_test(SERVER_1, DISPLAY, 0, '', PORT_1)
-  client.run_for_test(SERVER_2, DISPLAY, 0, '', PORT_2)
-  client.run_for_test(SERVER_3, DISPLAY, 0, '', PORT_3)
+  run_for_test(SERVER_1, DISPLAY, 0, '', PORT_1)
+  run_for_test(SERVER_2, DISPLAY, 0, '', PORT_2)
+  run_for_test(SERVER_3, DISPLAY, 0, '', PORT_3)
 
   # Comment lines below to review logs in text files
-  os.remove(FILE_1_NAME + '.txt')
-  os.remove(FILE_2_NAME + '.txt')
-  os.remove(FILE_3_NAME + '.txt')
+  remove(FILE_1_NAME + '.txt')
+  remove(FILE_2_NAME + '.txt')
+  remove(FILE_3_NAME + '.txt')
