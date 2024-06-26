@@ -4,31 +4,20 @@ import document
 import time
 import os
 import file
+import script_constants as SC
 
 if __name__ == "__main__":
-  server1 = '1'
-  server2 = '2'
-  server3 = '3'
-  port1 = '50051'
-  port2 = '50052'
-  port3 = '50053'
-  insert = 'insert'
-  delete = 'delete'
-  display = 'display'
-  file_1_name = 'server_1_file'
-  file_2_name = 'server_2_file'
-  file_3_name = 'server_3_file'
-  file_1 = file.File(file_1_name)
-  file_2 = file.File(file_2_name)
-  file_3 = file.File(file_3_name)
+  file_1 = file.File(SC.FILE_1_NAME)
+  file_2 = file.File(SC.FILE_2_NAME)
+  file_3 = file.File(SC.FILE_3_NAME)
 
   operations = [
-    (server1, insert, 0, 'x', port1),
-    (server2, insert, 1, 'y', port2),
-    (server3, insert, 2, 'z', port3),
-    (server1, delete, 0, '', port1),
-    (server2, insert, 3, 'w', port2),
-    (server3, delete, 1, '', port3),
+    (SC.SERVER_1, SC.INSERT, 0, 'x', SC.PORT_1),
+    (SC.SERVER_2, SC.INSERT, 1, 'y', SC.PORT_2),
+    (SC.SERVER_3, SC.INSERT, 2, 'z', SC.PORT_3),
+    (SC.SERVER_1, SC.DELETE, 0, '', SC.PORT_1),
+    (SC.SERVER_2, SC.INSERT, 3, 'w', SC.PORT_2),
+    (SC.SERVER_3, SC.DELETE, 1, '', SC.PORT_3),
   ]
 
   for op in operations:
@@ -41,4 +30,5 @@ if __name__ == "__main__":
   doc3 = file_3.get_content()
 
   assert repr(doc1) == repr(doc1) == repr(doc1), "Document states are inconsistent"
+  print("Succesfully execution.")
   print("All servers have consistent document state.")

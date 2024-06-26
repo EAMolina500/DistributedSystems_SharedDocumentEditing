@@ -1,34 +1,25 @@
 import threading
 import client
 import os
+import script_constants as SC
 
 def client_task(server, operation, index, char, port):
   client.run_for_test(server, operation, index, char, port)
 
 if __name__ == "__main__":
-  server1 = '1'
-  server2 = '2'
-  server3 = '3'
-  port1 = '50051'
-  port2 = '50052'
-  port3 = '50053'
-  insert = 'insert'
-  delete = 'delete'
-  display = 'display'
-
   threads = []
   operations = [
-    (server1, insert, 0, 'k', port1),
-    (server2, insert, 1, 'l', port2),
-    (server3, insert, 2, 'm', port3),
-    (server1, delete, 0, '', port1),
-    (server2, insert, 3, 'n', port2),
-    (server3, delete, 1, '', port3),
-    (server1, insert, 4, 'k', port1),
-    (server2, insert, 2, 'l', port2),
-    (server3, insert, 5, 'm', port3),
-    (server1, delete, 3, '', port1),
-    (server2, delete, 1, '', port3)
+    (SC.SERVER_1, SC.INSERT, 0, 'k', SC.PORT_1),
+    (SC.SERVER_2, SC.INSERT, 1, 'l', SC.PORT_2),
+    (SC.SERVER_3, SC.INSERT, 2, 'm', SC.PORT_3),
+    (SC.SERVER_1, SC.DELETE, 0, '', SC.PORT_1),
+    (SC.SERVER_2, SC.INSERT, 3, 'n', SC.PORT_2),
+    (SC.SERVER_3, SC.DELETE, 1, '', SC.PORT_3),
+    (SC.SERVER_1, SC.INSERT, 4, 'k', SC.PORT_1),
+    (SC.SERVER_2, SC.INSERT, 2, 'l', SC.PORT_2),
+    (SC.SERVER_3, SC.INSERT, 5, 'm', SC.PORT_3),
+    (SC.SERVER_1, SC.DELETE, 3, '', SC.PORT_1),
+    (SC.SERVER_2, SC.DELETE, 1, '', SC.PORT_3)
   ]
 
   for op in operations:
@@ -39,11 +30,11 @@ if __name__ == "__main__":
   for t in threads:
     t.join()
 
-  client.run_for_test(server1, display, 0, '', port1)
-  client.run_for_test(server2, display, 0, '', port2)
-  client.run_for_test(server3, display, 0, '', port3)
+  client.run_for_test(SC.SERVER_1, SC.DISPLAY, 0, '', SC.PORT_1)
+  client.run_for_test(SC.SERVER_2, SC.DISPLAY, 0, '', SC.PORT_2)
+  client.run_for_test(SC.SERVER_3, SC.DISPLAY, 0, '', SC.PORT_3)
 
-  # Borrar para revisar logs en los archivos
-  os.remove('server_1_file.txt')
-  os.remove('server_2_file.txt')
-  os.remove('server_3_file.txt')
+  # Comment lines below to review logs in text files
+  os.remove(SC.FILE_1_NAME + '.txt')
+  os.remove(SC.FILE_2_NAME + '.txt')
+  os.remove(SC.FILE_3_NAME + '.txt')
